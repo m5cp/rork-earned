@@ -8,98 +8,189 @@ struct TodayView: View {
     @State private var dragOffset: CGSize = .zero
     @State private var appeared: Bool = false
     @State private var cardTransition: Bool = false
+    @State private var arrowPulse: Bool = false
+    @State private var glowPulse: Bool = false
 
     private var isWide: Bool { horizontalSizeClass == .regular }
     private var cardMaxWidth: CGFloat { isWide ? 480 : .infinity }
 
-    private var dateString: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEEE, MMM d"
-        return formatter.string(from: .now)
+    private var greeting: String {
+        let hour = Calendar.current.component(.hour, from: .now)
+        if hour < 12 { return "YOUR MORNING" }
+        if hour < 17 { return "YOUR AFTERNOON" }
+        return "YOUR EVENING"
+    }
+
+    private var powerPhrase: String {
+        let dayHash = abs(DailyEntry.dateKey().hashValue)
+        let phrases = [
+            "Own this.",
+            "Build on this.",
+            "Earn it.",
+            "Make it count.",
+            "Your move.",
+            "Start now.",
+            "Claim today."
+        ]
+        return phrases[dayHash % phrases.count]
     }
 
     var body: some View {
         ZStack {
-            Color(.systemBackground).ignoresSafeArea()
+            backgroundLayer.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 header
-                    .padding(.top, 8)
+                    .padding(.top, 12)
 
-                progressBar
-                    .padding(.top, 16)
-                    .padding(.horizontal, isWide ? 40 : 24)
+                progressIndicator
+                    .padding(.top, 20)
+                    .padding(.horizontal, isWide ? 40 : 32)
 
                 Spacer()
 
                 cardStack
                     .frame(maxWidth: cardMaxWidth)
-                    .padding(.horizontal, isWide ? 40 : 24)
+                    .padding(.horizontal, isWide ? 40 : 20)
 
                 Spacer()
 
                 swipeHints
                     .frame(maxWidth: cardMaxWidth)
                     .padding(.horizontal, isWide ? 40 : 24)
-                    .padding(.bottom, 24)
+                    .padding(.bottom, 28)
             }
         }
         .onAppear {
-            if reduceMotion { appeared = true }
-            else { withAnimation(.easeOut(duration: 0.5)) { appeared = true } }
+            if reduceMotion {
+                appeared = true
+                glowPulse = true
+            } else {
+                withAnimation(.easeOut(duration: 0.6)) { appeared = true }
+                glowPulse = true
+            }
+            arrowPulse = true
         }
         .sensoryFeedback(.selection, trigger: viewModel.currentCardIndex)
     }
 
-    private var header: some View {
-        VStack(spacing: 4) {
-            Text(dateString.uppercased())
-                .font(.caption2.weight(.heavy))
-                .tracking(1.5)
-                .foregroundStyle(.tertiary)
+    private var backgroundLayer: some View {
+        ZStack {
+            EarnedColors.immersiveGradient
 
-            Text("\(viewModel.currentCardIndex + 1) of \(viewModel.todayWins.count)")
-                .font(.caption.weight(.bold))
-                .foregroundStyle(EarnedColors.accent)
-                .monospacedDigit()
+            RadialGradient(
+                colors: [
+                    EarnedColors.accent.opacity(0.2),
+                    Color.clear
+                ],
+                center: .top,
+                startRadius: 30,
+                endRadius: 400
+            )
+            .offset(y: -60)
+
+            RadialGradient(
+                colors: [
+                    EarnedColors.momentum.opacity(glowPulse ? 0.12 : 0.06),
+                    Color.clear
+                ],
+                center: .center,
+                startRadius: 0,
+                endRadius: 300
+            )
+            .animation(reduceMotion ? nil : .easeInOut(duration: 3.0).repeatForever(autoreverses: true), value: glowPulse)
+
+            RadialGradient(
+                colors: [
+                    EarnedColors.accent.opacity(0.06),
+                    Color.clear
+                ],
+                center: .bottomLeading,
+                startRadius: 0,
+                endRadius: 250
+            )
+
+            LinearGradient(
+                colors: [
+                    Color.black.opacity(0.15),
+                    Color.clear,
+                    Color.clear,
+                    Color.black.opacity(0.25)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
         }
-        .opacity(appeared ? 1 : 0)
-        .offset(y: appeared ? 0 : -8)
     }
 
-    private var progressBar: some View {
-        GeometryReader { geo in
-            let totalWidth = geo.size.width
-            let totalCards = max(viewModel.todayWins.count, 1)
-            let filledWidth = totalWidth * CGFloat(viewModel.currentCardIndex) / CGFloat(totalCards)
+    private var header: some View {
+        VStack(spacing: 8) {
+            Text(greeting)
+                .font(.caption2.weight(.heavy))
+                .tracking(3)
+                .foregroundStyle(.white.opacity(0.35))
 
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(Color(.tertiarySystemFill))
-                    .frame(height: 3)
+            Text(powerPhrase)
+                .font(.system(size: 28, weight: .black))
+                .foregroundStyle(.white)
+                .opacity(appeared ? 1 : 0)
+                .offset(y: reduceMotion ? 0 : (appeared ? 0 : 10))
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.5).delay(0.15), value: appeared)
+        }
+        .opacity(appeared ? 1 : 0)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.4), value: appeared)
+    }
 
+    private var progressIndicator: some View {
+        HStack(spacing: 6) {
+            ForEach(0..<viewModel.todayWins.count, id: \.self) { index in
                 Capsule()
-                    .fill(EarnedColors.accent)
-                    .frame(width: max(0, filledWidth), height: 3)
+                    .fill(
+                        index < viewModel.currentCardIndex
+                        ? AnyShapeStyle(EarnedColors.primaryGradient)
+                        : index == viewModel.currentCardIndex
+                            ? AnyShapeStyle(Color.white.opacity(0.5))
+                            : AnyShapeStyle(Color.white.opacity(0.12))
+                    )
+                    .frame(height: 4)
                     .animation(reduceMotion ? nil : .snappy(duration: 0.3), value: viewModel.currentCardIndex)
             }
         }
-        .frame(height: 3)
         .frame(maxWidth: cardMaxWidth)
+        .opacity(appeared ? 1 : 0)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.2), value: appeared)
     }
 
     private var cardStack: some View {
         ZStack {
+            if viewModel.currentCardIndex + 2 < viewModel.todayWins.count {
+                SwipeCardView(
+                    win: viewModel.todayWins[viewModel.currentCardIndex + 2],
+                    dragOffset: .zero,
+                    isWide: isWide,
+                    style: .immersive
+                )
+                .scaleEffect(0.88)
+                .opacity(0.15)
+                .offset(y: 12)
+                .allowsHitTesting(false)
+            }
+
             if viewModel.currentCardIndex + 1 < viewModel.todayWins.count {
-                let nextWin = viewModel.todayWins[viewModel.currentCardIndex + 1]
-                SwipeCardView(win: nextWin, dragOffset: .zero, isWide: isWide)
-                    .scaleEffect(0.95)
-                    .opacity(0.35)
-                    .allowsHitTesting(false)
+                SwipeCardView(
+                    win: viewModel.todayWins[viewModel.currentCardIndex + 1],
+                    dragOffset: .zero,
+                    isWide: isWide,
+                    style: .immersive
+                )
+                .scaleEffect(0.93)
+                .opacity(0.25)
+                .offset(y: 6)
+                .allowsHitTesting(false)
             }
 
             if let win = viewModel.currentWin {
-                SwipeCardView(win: win, dragOffset: dragOffset, isWide: isWide)
+                SwipeCardView(win: win, dragOffset: dragOffset, isWide: isWide, style: .immersive)
                     .id(win.id)
                     .offset(x: dragOffset.width, y: dragOffset.height * 0.15)
                     .rotationEffect(.degrees(reduceMotion ? 0 : dragOffset.width / 25))
@@ -122,39 +213,58 @@ struct TodayView: View {
         }
     }
 
-    @State private var arrowPulse: Bool = false
-
     private var swipeHints: some View {
         HStack(spacing: 0) {
-            VStack(spacing: 6) {
-                Image(systemName: "arrowshape.left.fill")
-                    .font(.system(size: 28, weight: .heavy))
-                    .offset(x: arrowPulse ? -4 : 0)
-                    .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: arrowPulse)
+            VStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.06))
+                        .frame(width: 52, height: 52)
+
+                    Image(systemName: "arrowshape.left.fill")
+                        .font(.system(size: 22, weight: .heavy))
+                        .offset(x: arrowPulse ? -3 : 0)
+                        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: arrowPulse)
+                }
                 Text("SKIP")
-                    .font(.subheadline.weight(.black))
+                    .font(.caption2.weight(.black))
                     .tracking(2)
             }
-            .foregroundStyle(Color(.secondaryLabel))
-            .opacity(dragOffset.width < -20 ? 0.4 : 1)
+            .foregroundStyle(.white.opacity(0.35))
+            .opacity(dragOffset.width < -20 ? 0.2 : 1)
 
             Spacer()
 
-            VStack(spacing: 6) {
-                Image(systemName: "arrowshape.right.fill")
-                    .font(.system(size: 28, weight: .heavy))
-                    .offset(x: arrowPulse ? 4 : 0)
-                    .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: arrowPulse)
+            VStack(spacing: 4) {
+                Text("\(viewModel.currentCardIndex + 1)/\(viewModel.todayWins.count)")
+                    .font(.system(.caption, design: .rounded, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.3))
+                    .monospacedDigit()
+            }
+
+            Spacer()
+
+            VStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(EarnedColors.earned.opacity(0.15))
+                        .frame(width: 52, height: 52)
+
+                    Image(systemName: "arrowshape.right.fill")
+                        .font(.system(size: 22, weight: .heavy))
+                        .offset(x: arrowPulse ? 3 : 0)
+                        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: arrowPulse)
+                }
                 Text("LOG IT")
-                    .font(.subheadline.weight(.black))
+                    .font(.caption2.weight(.black))
                     .tracking(2)
             }
             .foregroundStyle(EarnedColors.earned)
-            .opacity(dragOffset.width > 20 ? 0.4 : 1)
+            .opacity(dragOffset.width > 20 ? 0.2 : 1)
         }
         .opacity(appeared ? 1 : 0)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.35), value: appeared)
         .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-        .onAppear { arrowPulse = true }
     }
 
     private func handleSwipe(_ value: DragGesture.Value) {

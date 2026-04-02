@@ -1,9 +1,15 @@
 import SwiftUI
 
+nonisolated enum SwipeCardStyle: Sendable {
+    case standard
+    case immersive
+}
+
 struct SwipeCardView: View {
     let win: Win
     let dragOffset: CGSize
     var isWide: Bool = false
+    var style: SwipeCardStyle = .standard
 
     private var earnedOpacity: Double {
         max(0, min(1, dragOffset.width / 120))
@@ -15,6 +21,8 @@ struct SwipeCardView: View {
 
     private var cardHeight: CGFloat { isWide ? 480 : 420 }
 
+    private var isImmersive: Bool { style == .immersive }
+
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
@@ -23,16 +31,19 @@ struct SwipeCardView: View {
                 Circle()
                     .fill(
                         RadialGradient(
-                            colors: [win.category.color.opacity(0.2), win.category.color.opacity(0.05)],
+                            colors: [
+                                win.category.color.opacity(isImmersive ? 0.35 : 0.2),
+                                win.category.color.opacity(isImmersive ? 0.1 : 0.05)
+                            ],
                             center: .center,
                             startRadius: 0,
-                            endRadius: 48
+                            endRadius: isImmersive ? 52 : 48
                         )
                     )
-                    .frame(width: 84, height: 84)
+                    .frame(width: isImmersive ? 92 : 84, height: isImmersive ? 92 : 84)
 
                 Image(systemName: win.category.icon)
-                    .font(.system(size: 30, weight: .bold))
+                    .font(.system(size: isImmersive ? 34 : 30, weight: .bold))
                     .foregroundStyle(win.category.color)
                     .symbolEffect(.bounce, value: dragOffset.width > 80)
             }
@@ -42,7 +53,11 @@ struct SwipeCardView: View {
             Text(win.category.displayName.uppercased())
                 .font(.caption2.weight(.heavy))
                 .tracking(2.5)
-                .foregroundStyle(win.category.color.opacity(0.8))
+                .foregroundStyle(
+                    isImmersive
+                    ? win.category.color.opacity(0.9)
+                    : win.category.color.opacity(0.8)
+                )
 
             Spacer().frame(height: 16)
 
@@ -52,6 +67,7 @@ struct SwipeCardView: View {
                 .lineSpacing(6)
                 .padding(.horizontal, 28)
                 .minimumScaleFactor(0.8)
+                .foregroundStyle(isImmersive ? .white : .primary)
 
             Spacer()
 
@@ -73,7 +89,7 @@ struct SwipeCardView: View {
                         .font(.caption.weight(.black))
                         .tracking(2)
                 }
-                .foregroundStyle(Color(.systemGray3))
+                .foregroundStyle(isImmersive ? .white.opacity(0.4) : Color(.systemGray3))
                 .opacity(skippedOpacity)
             }
             .frame(height: 28)
@@ -84,24 +100,93 @@ struct SwipeCardView: View {
         .frame(maxWidth: .infinity)
         .frame(height: cardHeight)
         .background {
-            ZStack {
-                RoundedRectangle(cornerRadius: 28)
-                    .fill(Color(.secondarySystemBackground))
-
-                RoundedRectangle(cornerRadius: 28)
-                    .fill(earnedGlow)
-
-                RoundedRectangle(cornerRadius: 28)
-                    .fill(skipGlow)
+            if isImmersive {
+                immersiveBackground
+            } else {
+                standardBackground
             }
         }
         .overlay {
-            RoundedRectangle(cornerRadius: 28)
-                .strokeBorder(borderColor, lineWidth: 1)
+            if isImmersive {
+                immersiveBorder
+            } else {
+                RoundedRectangle(cornerRadius: 28)
+                    .strokeBorder(borderColor, lineWidth: 1)
+            }
         }
         .clipShape(.rect(cornerRadius: 28))
-        .shadow(color: .black.opacity(0.08), radius: 20, y: 8)
-        .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
+        .shadow(
+            color: isImmersive ? EarnedColors.accent.opacity(0.15) : .black.opacity(0.08),
+            radius: isImmersive ? 30 : 20,
+            y: isImmersive ? 12 : 8
+        )
+        .shadow(color: .black.opacity(0.06), radius: 4, y: 2)
+    }
+
+    private var immersiveBackground: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 28)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.08, green: 0.08, blue: 0.2),
+                            Color(red: 0.06, green: 0.06, blue: 0.16),
+                            Color(red: 0.04, green: 0.04, blue: 0.12)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+
+            RoundedRectangle(cornerRadius: 28)
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            win.category.color.opacity(0.08),
+                            Color.clear
+                        ],
+                        center: .top,
+                        startRadius: 0,
+                        endRadius: 250
+                    )
+                )
+
+            RoundedRectangle(cornerRadius: 28)
+                .fill(EarnedColors.earned.opacity(earnedOpacity * 0.12))
+
+            RoundedRectangle(cornerRadius: 28)
+                .fill(Color.white.opacity(skippedOpacity * 0.04))
+        }
+    }
+
+    private var immersiveBorder: some View {
+        RoundedRectangle(cornerRadius: 28)
+            .strokeBorder(
+                LinearGradient(
+                    colors: [
+                        earnedOpacity > 0.15
+                            ? EarnedColors.earned.opacity(earnedOpacity * 0.6)
+                            : Color.white.opacity(0.12),
+                        Color.white.opacity(0.04)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ),
+                lineWidth: 1
+            )
+    }
+
+    private var standardBackground: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 28)
+                .fill(Color(.secondarySystemBackground))
+
+            RoundedRectangle(cornerRadius: 28)
+                .fill(earnedGlow)
+
+            RoundedRectangle(cornerRadius: 28)
+                .fill(skipGlow)
+        }
     }
 
     private var earnedGlow: some ShapeStyle {
