@@ -122,32 +122,39 @@ struct TodayView: View {
         }
     }
 
+    @State private var arrowPulse: Bool = false
+
     private var swipeHints: some View {
         HStack(spacing: 0) {
-            HStack(spacing: 8) {
-                Image(systemName: "arrow.left")
-                    .font(.subheadline.weight(.black))
+            VStack(spacing: 6) {
+                Image(systemName: "arrowshape.left.fill")
+                    .font(.system(size: 28, weight: .heavy))
+                    .offset(x: arrowPulse ? -4 : 0)
+                    .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: arrowPulse)
                 Text("SKIP")
-                    .font(.caption.weight(.black))
-                    .tracking(1.5)
+                    .font(.subheadline.weight(.black))
+                    .tracking(2)
             }
-            .foregroundStyle(Color(.tertiaryLabel))
+            .foregroundStyle(Color(.secondaryLabel))
             .opacity(dragOffset.width < -20 ? 0.4 : 1)
 
             Spacer()
 
-            HStack(spacing: 8) {
+            VStack(spacing: 6) {
+                Image(systemName: "arrowshape.right.fill")
+                    .font(.system(size: 28, weight: .heavy))
+                    .offset(x: arrowPulse ? 4 : 0)
+                    .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: arrowPulse)
                 Text("LOG IT")
-                    .font(.caption.weight(.black))
-                    .tracking(1.5)
-                Image(systemName: "arrow.right")
                     .font(.subheadline.weight(.black))
+                    .tracking(2)
             }
             .foregroundStyle(EarnedColors.earned)
             .opacity(dragOffset.width > 20 ? 0.4 : 1)
         }
         .opacity(appeared ? 1 : 0)
         .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+        .onAppear { arrowPulse = true }
     }
 
     private func handleSwipe(_ value: DragGesture.Value) {
