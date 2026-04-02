@@ -51,6 +51,9 @@ struct ContentView: View {
             } else if viewModel.showSummary {
                 SummaryView(viewModel: viewModel)
                     .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .trailing)))
+            } else if viewModel.checkInComplete && viewModel.summaryDismissed {
+                DayCompleteView(viewModel: viewModel)
+                    .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.98)))
             } else {
                 TodayView(viewModel: viewModel)
                     .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .leading)))
@@ -59,5 +62,6 @@ struct ContentView: View {
         .animation(reduceMotion ? .none : .smooth(duration: 0.4), value: viewModel.showComeback)
         .animation(reduceMotion ? .none : .smooth(duration: 0.4), value: viewModel.showSummary)
         .animation(reduceMotion ? .none : .smooth(duration: 0.4), value: viewModel.showSayItOutLoud)
+        .animation(reduceMotion ? .none : .smooth(duration: 0.4), value: viewModel.summaryDismissed)
     }
 }

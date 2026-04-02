@@ -122,6 +122,7 @@ class EarnedViewModel {
     }
 
     var showSayItOutLoud: Bool = false
+    var summaryDismissed: Bool = false
 
     var sayItOutLoudStatement: String {
         let raw = SayItOutLoudLibrary.statement(for: todayEarnedWins)
@@ -372,12 +373,18 @@ class EarnedViewModel {
         entries.removeValue(forKey: todayKey)
         checkInComplete = false
         showSummary = false
+        summaryDismissed = false
         prepareTodayWins()
         saveEntries()
     }
 
     func startOver() {
         resetToday()
+    }
+
+    func dismissSummary() {
+        showSummary = false
+        summaryDismissed = true
     }
 
     func openSayItOutLoud() {

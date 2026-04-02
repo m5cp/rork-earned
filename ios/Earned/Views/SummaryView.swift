@@ -341,8 +341,7 @@ struct SummaryView: View {
                 .sensoryFeedback(.impact(flexibility: .soft), trigger: viewModel.showSayItOutLoud)
             } else {
                 Button {
-                    viewModel.showSummary = false
-                    viewModel.checkInComplete = false
+                    viewModel.dismissSummary()
                 } label: {
                     Text("Continue")
                         .font(.body.weight(.bold))
