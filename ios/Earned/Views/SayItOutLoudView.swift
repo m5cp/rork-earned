@@ -10,6 +10,8 @@ struct SayItOutLoudView: View {
     @State private var appeared: Bool = false
     @State private var statementVisible: Bool = false
     @State private var quoteVisible: Bool = false
+    @State private var didSayIt: Bool = false
+    @State private var buttonPulse: Bool = false
 
     private var isWide: Bool { horizontalSizeClass == .regular }
 
@@ -74,24 +76,46 @@ struct SayItOutLoudView: View {
                 Spacer()
 
                 Button {
-                    onComplete()
+                    guard !didSayIt else { return }
+                    didSayIt = true
+                    withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.5)) {
+                        buttonPulse = true
+                    }
+                    Task {
+                        try? await Task.sleep(for: .milliseconds(600))
+                        onComplete()
+                    }
                 } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.body.weight(.semibold))
-                        Text("I Said It")
-                            .font(.body.weight(.bold))
+                    HStack(spacing: 10) {
+                        Image(systemName: didSayIt ? "star.fill" : "checkmark.circle.fill")
+                            .font(.title3.weight(.bold))
+                            .contentTransition(.symbolEffect(.replace.magic(fallback: .downUp)))
+                        Text(didSayIt ? "You Owned It!" : "I Said It")
+                            .font(.title3.weight(.heavy))
+                            .contentTransition(.numericText())
                     }
                     .frame(maxWidth: isWide ? 400 : .infinity)
-                    .frame(height: 54)
-                    .background(EarnedColors.primaryGradient)
+                    .frame(height: 60)
+                    .background(
+                        ZStack {
+                            EarnedColors.primaryGradient
+                            if didSayIt {
+                                Color.white.opacity(0.15)
+                            }
+                        }
+                    )
                     .foregroundStyle(.white)
-                    .clipShape(.rect(cornerRadius: 16))
+                    .clipShape(.rect(cornerRadius: 18))
+                    .scaleEffect(buttonPulse ? 1.08 : 1.0)
+                    .shadow(color: didSayIt ? EarnedColors.accent.opacity(0.5) : .clear, radius: didSayIt ? 16 : 0, y: 4)
+                    .animation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.5), value: buttonPulse)
+                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: didSayIt)
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
                 .opacity(statementVisible ? 1 : 0)
                 .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(1.1), value: statementVisible)
+                .sensoryFeedback(.success, trigger: didSayIt)
             }
         }
         .onAppear {
