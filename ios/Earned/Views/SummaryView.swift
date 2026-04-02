@@ -328,17 +328,22 @@ struct SummaryView: View {
                 Button {
                     viewModel.openSayItOutLoud()
                 } label: {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 12) {
                         Image(systemName: "quote.opening")
-                            .font(.body.weight(.medium))
+                            .font(.title3.weight(.semibold))
                         Text("Say It Out Loud")
-                            .font(.body.weight(.bold))
+                            .font(.title3.weight(.bold))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(EarnedColors.deepNavy.opacity(0.5))
                     }
+                    .padding(.horizontal, 24)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 54)
+                    .frame(height: 64)
                     .background(.white)
                     .foregroundStyle(EarnedColors.deepNavy)
-                    .clipShape(.rect(cornerRadius: 16))
+                    .clipShape(.rect(cornerRadius: 18))
                 }
                 .sensoryFeedback(.impact(flexibility: .soft), trigger: viewModel.showSayItOutLoud)
 
@@ -347,9 +352,22 @@ struct SummaryView: View {
                         sayItOutLoudSkipped = true
                     }
                 } label: {
-                    Text("Skip")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.45))
+                    HStack(spacing: 12) {
+                        Image(systemName: "forward.fill")
+                            .font(.body.weight(.medium))
+                        Text("Skip for Now")
+                            .font(.body.weight(.semibold))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.25))
+                    }
+                    .padding(.horizontal, 24)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .background(.white.opacity(0.1))
+                    .foregroundStyle(.white.opacity(0.6))
+                    .clipShape(.rect(cornerRadius: 16))
                 }
                 .padding(.top, 2)
             } else if sayItOutLoudSkipped && !sayItOutLoudCompleted {
