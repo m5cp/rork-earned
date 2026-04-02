@@ -49,7 +49,9 @@ struct ContentView: View {
                 )
                 .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .trailing)))
             } else if viewModel.showSummary {
-                SummaryView(viewModel: viewModel)
+                SummaryView(viewModel: viewModel, onNavigateToProgress: {
+                    selectedTab = 1
+                })
                     .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .trailing)))
             } else if viewModel.checkInComplete && viewModel.summaryDismissed {
                 DayCompleteView(viewModel: viewModel)

@@ -2,11 +2,13 @@ import SwiftUI
 
 struct SummaryView: View {
     let viewModel: EarnedViewModel
+    let onNavigateToProgress: () -> Void
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared: Bool = false
     @State private var showShareSheet: Bool = false
     @State private var iconBounce: Int = 0
+    @State private var sayItOutLoudSkipped: Bool = false
 
     private var earnedWins: [Win] {
         viewModel.todayEarnedWins
@@ -322,7 +324,7 @@ struct SummaryView: View {
 
     private var actionButtons: some View {
         VStack(spacing: 12) {
-            if !sayItOutLoudCompleted {
+            if !sayItOutLoudCompleted && !sayItOutLoudSkipped {
                 Button {
                     viewModel.openSayItOutLoud()
                 } label: {
@@ -339,11 +341,37 @@ struct SummaryView: View {
                     .clipShape(.rect(cornerRadius: 16))
                 }
                 .sensoryFeedback(.impact(flexibility: .soft), trigger: viewModel.showSayItOutLoud)
+
+                Button {
+                    withAnimation(.smooth(duration: 0.3)) {
+                        sayItOutLoudSkipped = true
+                    }
+                } label: {
+                    Text("Skip")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.45))
+                }
+                .padding(.top, 2)
+            } else if sayItOutLoudSkipped && !sayItOutLoudCompleted {
+                Button {
+                    viewModel.dismissSummary()
+                    onNavigateToProgress()
+                } label: {
+                    Text("Done! Go to Progress")
+                        .font(.body.weight(.bold))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 54)
+                        .background(.white)
+                        .foregroundStyle(EarnedColors.deepNavy)
+                        .clipShape(.rect(cornerRadius: 16))
+                }
+                .sensoryFeedback(.success, trigger: sayItOutLoudSkipped)
             } else {
                 Button {
                     viewModel.dismissSummary()
+                    onNavigateToProgress()
                 } label: {
-                    Text("Continue")
+                    Text("Done for Today")
                         .font(.body.weight(.bold))
                         .frame(maxWidth: .infinity)
                         .frame(height: 54)
