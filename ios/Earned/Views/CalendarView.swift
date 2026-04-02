@@ -58,7 +58,7 @@ struct CalendarView: View {
             ForEach(Array(weekdayLabels.enumerated()), id: \.offset) { _, label in
                 Text(label)
                     .font(.caption2.weight(.bold))
-                    .foregroundStyle(EarnedColors.accent.opacity(0.5))
+                    .foregroundStyle(EarnedColors.accent.opacity(0.8))
                     .frame(maxWidth: .infinity)
             }
         }
@@ -124,10 +124,10 @@ struct CalendarView: View {
                     .font(.system(.callout, design: .rounded, weight: hasActivity ? .bold : .regular))
                     .foregroundStyle(
                         isSelected ? .white :
-                        isFuture ? Color(.quaternaryLabel) :
+                        isFuture ? Color(.tertiaryLabel) :
                         hasActivity ? EarnedColors.accent :
                         isToday ? .primary :
-                        isMissedDay ? Color(.tertiaryLabel) :
+                        isMissedDay ? Color(.secondaryLabel) :
                         .secondary
                     )
             }

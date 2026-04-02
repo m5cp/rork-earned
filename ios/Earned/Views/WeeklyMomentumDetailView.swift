@@ -90,8 +90,8 @@ struct WeeklyMomentumDetailView: View {
                     .multilineTextAlignment(.center)
 
                 Text(dateRangeLabel)
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.tertiary)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
                     .padding(.top, 2)
             }
             .opacity(appeared ? 1 : 0)
@@ -181,7 +181,7 @@ struct WeeklyMomentumDetailView: View {
 
             if highlights.isEmpty {
                 Text("Keep going. Your highlights will appear here.")
-                    .font(.subheadline)
+                    .font(.subheadline.weight(.medium))
                     .foregroundStyle(.secondary)
                     .padding(18)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -277,8 +277,8 @@ struct WeeklyMomentumDetailView: View {
                 .foregroundStyle(.primary)
 
             Text(label)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.primary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
@@ -291,20 +291,20 @@ struct WeeklyMomentumDetailView: View {
             HStack(spacing: 8) {
                 Image(systemName: "info.circle")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.primary)
 
                 Text("How It Works")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.primary)
             }
 
             Text("MVM Earned uses your activity in the app to recognize progress, consistency, and return behavior.")
                 .font(.caption)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(.secondary)
 
             Text("Built from what you do. Never from what you missed.")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(EarnedColors.momentum.opacity(0.7))
+                .font(.caption.weight(.bold))
+                .foregroundStyle(EarnedColors.momentum)
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -145,7 +145,8 @@ struct SummaryView: View {
         Text("TODAY")
             .font(.caption2.weight(.heavy))
             .tracking(2.5)
-            .foregroundStyle(.white.opacity(0.35))
+            .foregroundStyle(EarnedColors.accentBright)
+            .raisedText()
             .opacity(appeared ? 1 : 0)
             .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.1), value: appeared)
     }
@@ -155,12 +156,12 @@ struct SummaryView: View {
             ZStack {
                 if earnedWins.isEmpty {
                     Circle()
-                        .fill(.white.opacity(0.06))
+                        .fill(.white.opacity(0.1))
                         .frame(width: 80, height: 80)
 
                     Image(systemName: "moon.fill")
                         .font(.system(size: 28, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.3))
+                        .foregroundStyle(.white.opacity(0.6))
                 } else {
                     Circle()
                         .fill(
@@ -179,6 +180,7 @@ struct SummaryView: View {
                     Text("\(earnedWins.count)")
                         .font(.system(size: 34, weight: .black, design: .rounded))
                         .foregroundStyle(.white)
+                        .raisedHeadline()
                         .symbolEffect(.bounce, value: iconBounce)
                 }
             }
@@ -190,6 +192,7 @@ struct SummaryView: View {
                 .font(.system(size: 32, weight: .heavy))
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.white)
+                .raisedHeadline()
                 .opacity(appeared ? 1 : 0)
                 .offset(y: reduceMotion ? 0 : (appeared ? 0 : 16))
                 .animation(reduceMotion ? nil : .easeOut(duration: 0.5).delay(0.25), value: appeared)
@@ -219,7 +222,7 @@ struct SummaryView: View {
             )
         }
         .padding(.vertical, 16)
-        .background(.white.opacity(0.07))
+        .background(.white.opacity(0.1))
         .clipShape(.rect(cornerRadius: 14))
         .opacity(appeared ? 1 : 0)
         .offset(y: reduceMotion ? 0 : (appeared ? 0 : 10))
@@ -240,20 +243,21 @@ struct SummaryView: View {
             Text(value)
                 .font(.system(.headline, design: .rounded, weight: .bold))
                 .foregroundStyle(.white)
+                .raisedText()
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
 
             Text(label.uppercased())
                 .font(.system(size: 9, weight: .heavy))
                 .tracking(0.8)
-                .foregroundStyle(.white.opacity(0.4))
+                .foregroundStyle(EarnedColors.immersiveSublabel)
         }
         .frame(maxWidth: .infinity)
     }
 
     private var statDivider: some View {
         Rectangle()
-            .fill(Color.white.opacity(0.1))
+            .fill(Color.white.opacity(0.15))
             .frame(width: 0.5, height: 28)
     }
 
@@ -262,7 +266,8 @@ struct SummaryView: View {
             Text("WHAT YOU EARNED")
                 .font(.caption2.weight(.heavy))
                 .tracking(1.8)
-                .foregroundStyle(.white.opacity(0.3))
+                .foregroundStyle(EarnedColors.earnedBright)
+                .raisedText()
                 .padding(.leading, 4)
                 .padding(.bottom, 14)
                 .opacity(appeared ? 1 : 0)
@@ -274,13 +279,13 @@ struct SummaryView: View {
 
                     if index < earnedWins.count - 1 {
                         Rectangle()
-                            .fill(Color.white.opacity(0.06))
+                            .fill(Color.white.opacity(0.08))
                             .frame(height: 0.5)
                             .padding(.leading, 58)
                     }
                 }
             }
-            .background(.white.opacity(0.06))
+            .background(.white.opacity(0.08))
             .clipShape(.rect(cornerRadius: 16))
         }
     }
@@ -289,7 +294,7 @@ struct SummaryView: View {
         HStack(spacing: 12) {
             ZStack {
                 Circle()
-                    .fill(win.category.color.opacity(0.15))
+                    .fill(win.category.color.opacity(0.2))
                     .frame(width: 36, height: 36)
 
                 Image(systemName: win.category.icon)
@@ -299,19 +304,20 @@ struct SummaryView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(win.text)
-                    .font(.subheadline.weight(.semibold))
+                    .font(.subheadline.weight(.bold))
                     .foregroundStyle(.white)
+                    .raisedText()
 
                 Text(win.category.displayName)
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(win.category.color.opacity(0.7))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(win.category.color)
             }
 
             Spacer()
 
             Image(systemName: "checkmark")
                 .font(.caption.weight(.bold))
-                .foregroundStyle(EarnedColors.earned)
+                .foregroundStyle(EarnedColors.earnedBright)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 11)
@@ -336,7 +342,7 @@ struct SummaryView: View {
                         Spacer()
                         Image(systemName: "chevron.right")
                             .font(.body.weight(.semibold))
-                            .foregroundStyle(EarnedColors.deepNavy.opacity(0.5))
+                            .foregroundStyle(EarnedColors.deepNavy.opacity(0.7))
                     }
                     .padding(.horizontal, 24)
                     .frame(maxWidth: .infinity)
@@ -356,17 +362,17 @@ struct SummaryView: View {
                         Image(systemName: "forward.fill")
                             .font(.body.weight(.medium))
                         Text("Skip for Now")
-                            .font(.body.weight(.semibold))
+                            .font(.body.weight(.bold))
                         Spacer()
                         Image(systemName: "chevron.right")
                             .font(.caption.weight(.semibold))
-                            .foregroundStyle(.white.opacity(0.25))
+                            .foregroundStyle(.white.opacity(0.5))
                     }
                     .padding(.horizontal, 24)
                     .frame(maxWidth: .infinity)
                     .frame(height: 56)
-                    .background(.white.opacity(0.1))
-                    .foregroundStyle(.white.opacity(0.6))
+                    .background(.white.opacity(0.15))
+                    .foregroundStyle(.white.opacity(0.9))
                     .clipShape(.rect(cornerRadius: 16))
                 }
                 .padding(.top, 2)
@@ -407,12 +413,12 @@ struct SummaryView: View {
                         Image(systemName: "square.and.arrow.up")
                             .font(.body.weight(.medium))
                         Text("Share")
-                            .font(.body.weight(.semibold))
+                            .font(.body.weight(.bold))
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 54)
-                    .background(.white.opacity(0.1))
-                    .foregroundStyle(.white.opacity(0.85))
+                    .background(.white.opacity(0.15))
+                    .foregroundStyle(.white.opacity(0.95))
                     .clipShape(.rect(cornerRadius: 16))
                 }
             }
@@ -421,8 +427,8 @@ struct SummaryView: View {
                 viewModel.startOver()
             } label: {
                 Text("Redo")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.white.opacity(0.3))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.6))
             }
             .padding(.top, 4)
         }

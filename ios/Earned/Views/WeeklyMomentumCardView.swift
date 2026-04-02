@@ -30,17 +30,20 @@ struct WeeklyMomentumCardView: View {
                 Text("THIS WEEK")
                     .font(.caption2.weight(.heavy))
                     .tracking(1.8)
-                    .foregroundStyle(.white.opacity(0.5))
+                    .foregroundStyle(EarnedColors.accentBright)
+                    .raisedText()
 
                 Text(viewModel.weeklyMomentumHeadline)
                     .font(.system(size: 26, weight: .bold))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.white)
+                    .raisedHeadline()
 
                 if !momentum.isEmpty {
                     Text(viewModel.weeklyMomentumSubheadline)
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(.white.opacity(0.65))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .raisedText()
                         .multilineTextAlignment(.center)
                 }
             }
@@ -117,7 +120,7 @@ struct WeeklyMomentumCardView: View {
                     Image(systemName: trendArrow)
                         .font(.system(size: 9, weight: .bold))
                 }
-                .foregroundStyle(.white.opacity(0.55))
+                .foregroundStyle(EarnedColors.immersiveLabel)
                 .frame(maxWidth: .infinity)
             }
         }
@@ -135,7 +138,7 @@ struct WeeklyMomentumCardView: View {
             Text(label)
                 .font(.system(size: 9, weight: .heavy))
                 .tracking(0.8)
-                .foregroundStyle(.white.opacity(0.4))
+                .foregroundStyle(EarnedColors.immersiveSublabel)
         }
         .frame(maxWidth: .infinity)
     }

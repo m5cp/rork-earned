@@ -128,11 +128,13 @@ struct TodayView: View {
             Text(greeting)
                 .font(.caption2.weight(.heavy))
                 .tracking(3)
-                .foregroundStyle(.white.opacity(0.35))
+                .foregroundStyle(EarnedColors.accentBright)
+                .raisedText()
 
             Text(powerPhrase)
                 .font(.system(size: 28, weight: .black))
                 .foregroundStyle(.white)
+                .raisedHeadline()
                 .opacity(appeared ? 1 : 0)
                 .offset(y: reduceMotion ? 0 : (appeared ? 0 : 10))
                 .animation(reduceMotion ? nil : .easeOut(duration: 0.5).delay(0.15), value: appeared)
@@ -149,8 +151,8 @@ struct TodayView: View {
                         index < viewModel.currentCardIndex
                         ? AnyShapeStyle(EarnedColors.primaryGradient)
                         : index == viewModel.currentCardIndex
-                            ? AnyShapeStyle(Color.white.opacity(0.5))
-                            : AnyShapeStyle(Color.white.opacity(0.12))
+                            ? AnyShapeStyle(Color.white.opacity(0.7))
+                            : AnyShapeStyle(Color.white.opacity(0.25))
                     )
                     .frame(height: 4)
                     .animation(reduceMotion ? nil : .snappy(duration: 0.3), value: viewModel.currentCardIndex)
@@ -230,7 +232,7 @@ struct TodayView: View {
                     .font(.caption2.weight(.black))
                     .tracking(2)
             }
-            .foregroundStyle(.white.opacity(0.35))
+            .foregroundStyle(.white.opacity(0.8))
             .opacity(dragOffset.width < -20 ? 0.2 : 1)
 
             Spacer()
@@ -238,7 +240,7 @@ struct TodayView: View {
             VStack(spacing: 4) {
                 Text("\(viewModel.currentCardIndex + 1)/\(viewModel.todayWins.count)")
                     .font(.system(.caption, design: .rounded, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.3))
+                    .foregroundStyle(.white.opacity(0.7))
                     .monospacedDigit()
             }
 

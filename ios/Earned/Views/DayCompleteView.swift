@@ -16,7 +16,7 @@ struct DayCompleteView: View {
 
                 ZStack {
                     Circle()
-                        .fill(EarnedColors.earned.opacity(0.12))
+                        .fill(EarnedColors.earned.opacity(0.15))
                         .frame(width: 88, height: 88)
 
                     Image(systemName: "checkmark")
@@ -33,8 +33,8 @@ struct DayCompleteView: View {
 
                     if earnedCount > 0 {
                         Text("\(earnedCount) earned today")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.secondary)
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(EarnedColors.accent)
                     }
                 }
                 .opacity(appeared ? 1 : 0)
@@ -50,7 +50,7 @@ struct DayCompleteView: View {
                         }
                     } label: {
                         Text("View Summary")
-                            .font(.subheadline.weight(.semibold))
+                            .font(.subheadline.weight(.bold))
                             .foregroundStyle(EarnedColors.accent)
                     }
 
@@ -58,8 +58,8 @@ struct DayCompleteView: View {
                         viewModel.startOver()
                     } label: {
                         Text("Redo")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.tertiary)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.secondary)
                     }
                 }
                 .opacity(appeared ? 1 : 0)

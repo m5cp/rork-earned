@@ -5,6 +5,17 @@ nonisolated enum SwipeCardStyle: Sendable {
     case immersive
 }
 
+struct RaisedIfImmersive: ViewModifier {
+    let isImmersive: Bool
+    func body(content: Content) -> some View {
+        if isImmersive {
+            content.shadow(color: .black.opacity(0.5), radius: 2, y: 2)
+        } else {
+            content
+        }
+    }
+}
+
 struct SwipeCardView: View {
     let win: Win
     let dragOffset: CGSize
@@ -53,11 +64,8 @@ struct SwipeCardView: View {
             Text(win.category.displayName.uppercased())
                 .font(.caption2.weight(.heavy))
                 .tracking(2.5)
-                .foregroundStyle(
-                    isImmersive
-                    ? win.category.color.opacity(0.9)
-                    : win.category.color.opacity(0.8)
-                )
+                .foregroundStyle(win.category.color)
+                .raisedText()
 
             Spacer().frame(height: 16)
 
@@ -68,6 +76,7 @@ struct SwipeCardView: View {
                 .padding(.horizontal, 28)
                 .minimumScaleFactor(0.8)
                 .foregroundStyle(isImmersive ? .white : .primary)
+                .modifier(RaisedIfImmersive(isImmersive: isImmersive))
 
             Spacer()
 
@@ -89,7 +98,7 @@ struct SwipeCardView: View {
                         .font(.caption.weight(.black))
                         .tracking(2)
                 }
-                .foregroundStyle(isImmersive ? .white.opacity(0.4) : Color(.systemGray3))
+                .foregroundStyle(isImmersive ? .white.opacity(0.7) : Color(.systemGray2))
                 .opacity(skippedOpacity)
             }
             .frame(height: 28)

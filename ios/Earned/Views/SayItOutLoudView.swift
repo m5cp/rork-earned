@@ -24,11 +24,11 @@ struct SayItOutLoudView: View {
                         onDismiss()
                     } label: {
                         Text("Not now")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.tertiary)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.secondary)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
-                            .background(Color(.tertiarySystemFill))
+                            .background(Color(.secondarySystemFill))
                             .clipShape(Capsule())
                     }
                 }
@@ -40,7 +40,7 @@ struct SayItOutLoudView: View {
                 VStack(spacing: 36) {
                     Image(systemName: "quote.opening")
                         .font(.system(size: 32, weight: .bold))
-                        .foregroundStyle(EarnedColors.accent.opacity(0.25))
+                        .foregroundStyle(EarnedColors.accent.opacity(0.5))
                         .opacity(quoteVisible ? 1 : 0)
                         .scaleEffect(quoteVisible ? 1 : 0.5)
                         .animation(reduceMotion ? nil : .spring(response: 0.6, dampingFraction: 0.65).delay(0.2), value: quoteVisible)
@@ -64,7 +64,7 @@ struct SayItOutLoudView: View {
 
                         Text("Say it. Own it.")
                             .font(.subheadline.weight(.bold))
-                            .foregroundStyle(EarnedColors.accent.opacity(0.5))
+                            .foregroundStyle(EarnedColors.accent)
                             .opacity(statementVisible ? 1 : 0)
                             .animation(reduceMotion ? nil : .easeOut(duration: 0.5).delay(0.9), value: statementVisible)
                     }

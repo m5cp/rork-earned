@@ -83,7 +83,7 @@ struct EarnedProgressView: View {
             Text(label.uppercased())
                 .font(.system(size: 9, weight: .heavy))
                 .tracking(0.5)
-                .foregroundStyle(.white.opacity(0.65))
+                .foregroundStyle(.white.opacity(0.9))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
@@ -169,7 +169,7 @@ struct EarnedProgressView: View {
             barGradient = LinearGradient(colors: [Color(.tertiarySystemFill)], startPoint: .bottom, endPoint: .top)
         }
 
-        let labelColor: Color = isTodayDate ? EarnedColors.accent : hasEntry ? .secondary : Color(.tertiaryLabel)
+        let labelColor: Color = isTodayDate ? EarnedColors.accent : hasEntry ? .primary : Color(.secondaryLabel)
 
         return Button {
             selectedDate = item.date
