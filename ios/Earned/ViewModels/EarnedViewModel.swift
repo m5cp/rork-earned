@@ -354,6 +354,7 @@ class EarnedViewModel {
             showSummary = true
             saveEntries()
             refreshNudgeIfNeeded()
+            syncToCalendarIfNeeded()
         }
     }
 
@@ -467,5 +468,16 @@ class EarnedViewModel {
     func saveEntries() {
         guard let data = try? JSONEncoder().encode(entries) else { return }
         UserDefaults.standard.set(data, forKey: storageKey)
+    }
+
+    func syncToCalendarIfNeeded() {
+        guard let entry = todayEntry else { return }
+        let wins = todayEarnedWins
+        CalendarSyncService.shared.syncSession(
+            entry: entry,
+            earnedWins: wins,
+            streak: currentStreak,
+            trend: trendLabel
+        )
     }
 }

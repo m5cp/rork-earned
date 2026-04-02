@@ -402,6 +402,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Sync your earned sessions to a dedicated Earned calendar so your progress shows alongside your schedule.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Take a photo for your share card background";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Save your share card to Photos";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Choose a photo for your share card background";
@@ -439,6 +440,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Sync your earned sessions to a dedicated Earned calendar so your progress shows alongside your schedule.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Take a photo for your share card background";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Save your share card to Photos";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Choose a photo for your share card background";

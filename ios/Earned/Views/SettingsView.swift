@@ -16,12 +16,15 @@ struct SettingsView: View {
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
     @State private var showEULA: Bool = false
     @State private var weeklyMomentumEnabled: Bool = false
+    @State private var calendarSyncEnabled: Bool = false
+    @State private var calendarAccessDenied: Bool = false
 
     var body: some View {
         NavigationStack {
             List {
                 dailyNudgeSection
                 weeklyMomentumSection
+                calendarSyncSection
                 appearanceSection
                 privacySection
                 supportSection
@@ -35,6 +38,7 @@ struct SettingsView: View {
             .onAppear {
                 loadNudgeState()
                 weeklyMomentumEnabled = UserDefaults.standard.bool(forKey: "weeklyMomentumEnabled")
+                calendarSyncEnabled = CalendarSyncService.shared.isSyncEnabled
             }
             .alert("Reset All Data?", isPresented: $showResetAlert) {
                 Button("Reset", role: .destructive) {
@@ -47,6 +51,18 @@ struct SettingsView: View {
             } message: {
                 Text("This will permanently delete all your check-in history and streaks.")
             }
+            .alert("Calendar Access Denied", isPresented: $calendarAccessDenied) {
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("Cancel", role: .cancel) {
+                    calendarSyncEnabled = false
+                }
+            } message: {
+                Text("Enable calendar access in Settings to sync your earned sessions.")
+            }
             .alert("Notifications Disabled", isPresented: $notificationDenied) {
                 Button("Open Settings") {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -58,6 +74,37 @@ struct SettingsView: View {
                 }
             } message: {
                 Text("Enable notifications in Settings to receive nudges.")
+            }
+        }
+    }
+
+    private var calendarSyncSection: some View {
+        Section {
+            Toggle("Sync to Calendar", isOn: $calendarSyncEnabled)
+                .onChange(of: calendarSyncEnabled) { _, newValue in
+                    if newValue {
+                        enableCalendarSync()
+                    } else {
+                        CalendarSyncService.shared.isSyncEnabled = false
+                    }
+                }
+        } header: {
+            Text("Apple Calendar")
+        } footer: {
+            Text("Creates an \"Earned\" calendar with a daily event for each completed session — visible alongside your real schedule.")
+        }
+    }
+
+    private func enableCalendarSync() {
+        Task {
+            let granted = await CalendarSyncService.shared.requestAccess()
+            if granted {
+                CalendarSyncService.shared.isSyncEnabled = true
+                viewModel.syncToCalendarIfNeeded()
+            } else {
+                calendarAccessDenied = true
+                calendarSyncEnabled = false
+                CalendarSyncService.shared.isSyncEnabled = false
             }
         }
     }
