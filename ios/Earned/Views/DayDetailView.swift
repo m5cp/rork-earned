@@ -11,6 +11,10 @@ struct DayDetailView: View {
     @State private var isEditingNote: Bool = false
     @State private var showExportSheet: Bool = false
     @State private var pdfURL: URL?
+    @State private var showResultsCard: Bool = false
+    @State private var resultsCardImage: UIImage?
+    @State private var savedToPhotos: Bool = false
+    @State private var isSavingImage: Bool = false
     @FocusState private var noteIsFocused: Bool
 
     private var dateKey: String { DailyEntry.dateKey(for: date) }
@@ -54,7 +58,7 @@ struct DayDetailView: View {
                         earnedSection
                     }
                     journalSection
-                    exportButton
+                    exportButtons
                 }
                 .padding(.horizontal)
                 .padding(.top, 8)
@@ -98,6 +102,9 @@ struct DayDetailView: View {
                 if let url = pdfURL {
                     ShareSheet(items: [url])
                 }
+            }
+            .sheet(isPresented: $showResultsCard) {
+                resultsCardSheet
             }
             .onAppear {
                 journalText = entry?.journalNote ?? ""
@@ -277,22 +284,44 @@ struct DayDetailView: View {
         .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.2), value: appeared)
     }
 
-    private var exportButton: some View {
-        Button {
-            exportPDF()
-        } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "doc.text")
-                    .font(.body.weight(.semibold))
+    private var exportButtons: some View {
+        VStack(spacing: 10) {
+            Button {
+                exportPDF()
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "doc.richtext")
+                        .font(.body.weight(.semibold))
 
-                Text("Export as Journal Entry")
-                    .font(.subheadline.weight(.semibold))
+                    Text("Export as PDF")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .foregroundStyle(EarnedColors.accent)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(EarnedColors.accent.opacity(0.1))
+                .clipShape(.rect(cornerRadius: 14))
             }
-            .foregroundStyle(EarnedColors.accent)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(EarnedColors.accent.opacity(0.1))
-            .clipShape(.rect(cornerRadius: 14))
+            .sensoryFeedback(.impact(weight: .medium), trigger: showExportSheet)
+
+            Button {
+                showResultsCard = true
+                renderResultsCard()
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.body.weight(.semibold))
+
+                    Text("Share Results Card")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(EarnedColors.earnedGradient)
+                .clipShape(.rect(cornerRadius: 14))
+            }
+            .sensoryFeedback(.impact(weight: .medium), trigger: showResultsCard)
         }
         .opacity(appeared ? 1 : 0)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.3), value: appeared)
@@ -303,6 +332,111 @@ struct DayDetailView: View {
         let current = entry?.journalNote ?? ""
         if trimmed != current {
             viewModel.saveJournalNote(for: dateKey, note: trimmed)
+        }
+    }
+
+    private var resultsCardSheet: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 20) {
+                    if let image = resultsCardImage {
+                        Image(uiImage: image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .clipShape(.rect(cornerRadius: 20))
+                            .shadow(color: .black.opacity(0.3), radius: 16, y: 8)
+                            .padding(.horizontal, 20)
+                    } else {
+                        ProgressView()
+                            .frame(height: 300)
+                    }
+
+                    HStack(spacing: 12) {
+                        Button {
+                            saveResultsCardToPhotos()
+                        } label: {
+                            HStack(spacing: 6) {
+                                if savedToPhotos {
+                                    Image(systemName: "checkmark")
+                                    Text("Saved")
+                                } else if isSavingImage {
+                                    ProgressView()
+                                        .controlSize(.small)
+                                } else {
+                                    Image(systemName: "square.and.arrow.down")
+                                    Text("Save")
+                                }
+                            }
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(savedToPhotos ? EarnedColors.earned : .primary)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(Color(.secondarySystemBackground))
+                            .clipShape(.rect(cornerRadius: 14))
+                        }
+                        .sensoryFeedback(.success, trigger: savedToPhotos)
+
+                        if let image = resultsCardImage {
+                            ShareLink(
+                                item: Image(uiImage: image),
+                                preview: SharePreview("MVM Earned", image: Image(uiImage: image))
+                            ) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "square.and.arrow.up")
+                                    Text("Share")
+                                }
+                                .font(.subheadline.weight(.bold))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 48)
+                                .background(EarnedColors.earnedGradient)
+                                .clipShape(.rect(cornerRadius: 14))
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+                .padding(.top, 16)
+                .padding(.bottom, 40)
+            }
+            .scrollIndicators(.hidden)
+            .navigationTitle("Results Card")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        showResultsCard = false
+                        savedToPhotos = false
+                    }
+                    .fontWeight(.semibold)
+                    .foregroundStyle(EarnedColors.accent)
+                }
+            }
+        }
+    }
+
+    @MainActor
+    private func renderResultsCard() {
+        let cardView = ResultsCardView(
+            date: date,
+            wins: earnedWins,
+            journalNote: journalText.isEmpty ? nil : journalText,
+            isComeback: isComeback,
+            isRendering: true
+        )
+
+        let renderer = ImageRenderer(content: cardView)
+        renderer.scale = 3
+        resultsCardImage = renderer.uiImage
+    }
+
+    private func saveResultsCardToPhotos() {
+        guard let image = resultsCardImage else { return }
+        isSavingImage = true
+        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            isSavingImage = false
+            savedToPhotos = true
         }
     }
 
