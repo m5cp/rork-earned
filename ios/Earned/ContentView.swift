@@ -3,10 +3,28 @@ import SwiftUI
 struct ContentView: View {
     @State private var viewModel = EarnedViewModel()
     @State private var selectedTab: Int = 0
+    @State private var showSplash: Bool = true
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
+        ZStack {
+            mainContent
+                .opacity(showSplash ? 0 : 1)
+
+            if showSplash {
+                SplashView {
+                    withAnimation(.smooth(duration: 0.5)) {
+                        showSplash = false
+                    }
+                }
+                .transition(.opacity)
+            }
+        }
+        .preferredColorScheme(appTheme.colorScheme)
+    }
+
+    private var mainContent: some View {
         TabView(selection: $selectedTab) {
             Tab("Today", systemImage: "checkmark.circle.fill", value: 0) {
                 todayFlow
@@ -21,7 +39,6 @@ struct ContentView: View {
             }
         }
         .tint(EarnedColors.accent)
-        .preferredColorScheme(appTheme.colorScheme)
     }
 
     private var todayFlow: some View {
