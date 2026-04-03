@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 @Observable
 @MainActor
@@ -321,6 +322,8 @@ class EarnedViewModel {
         if !checkInComplete && isReturningAfterMissedDay && todayEntry?.isComeback != true {
             showComeback = true
         }
+
+        syncWidgetData()
     }
 
     func prepareTodayWins() {
@@ -349,12 +352,15 @@ class EarnedViewModel {
     private func advanceCard() {
         if currentCardIndex < todayWins.count - 1 {
             currentCardIndex += 1
+            updateLiveActivity()
         } else {
             checkInComplete = true
             showSummary = true
             saveEntries()
             refreshNudgeIfNeeded()
             syncToCalendarIfNeeded()
+            syncWidgetData()
+            CheckInActivityService.endSession()
         }
     }
 
@@ -468,6 +474,40 @@ class EarnedViewModel {
     func saveEntries() {
         guard let data = try? JSONEncoder().encode(entries) else { return }
         UserDefaults.standard.set(data, forKey: storageKey)
+    }
+
+    func syncWidgetData() {
+        let latestWin = todayEarnedWins.last
+        SharedDataService.writeWidgetData(
+            todayWin: latestWin?.text,
+            streak: currentStreak,
+            earnedCount: todayEarnedCount,
+            consistency: consistencyRatio,
+            topCategory: topCategory?.displayName,
+            trend: trendLabel
+        )
+    }
+
+    func startLiveActivity() {
+        guard !todayWins.isEmpty else { return }
+        let firstWin = todayWins[0]
+        CheckInActivityService.startSession(
+            totalCards: todayWins.count,
+            firstWinText: firstWin.text,
+            firstCategory: firstWin.category.displayName
+        )
+    }
+
+    private func updateLiveActivity() {
+        let earned = todayEarnedCount
+        let currentText = currentWin?.text ?? ""
+        let currentCat = currentWin?.category.displayName ?? ""
+        CheckInActivityService.updateProgress(
+            earnedCount: earned,
+            totalCards: todayWins.count,
+            currentWinText: currentText,
+            currentCategory: currentCat
+        )
     }
 
     func syncToCalendarIfNeeded() {

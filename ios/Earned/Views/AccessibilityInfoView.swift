@@ -50,6 +50,20 @@ struct AccessibilityInfoView: View {
                 )
 
                 sectionCard(
+                    icon: "rectangle.on.rectangle.angled",
+                    iconColor: EarnedColors.streak,
+                    title: "Widgets & Live Activities",
+                    content: "Home Screen and Lock Screen widgets support Dynamic Type and VoiceOver. Live Activities on the Lock Screen and Dynamic Island show check-in progress with accessible labels."
+                )
+
+                sectionCard(
+                    icon: "mic.fill",
+                    iconColor: EarnedColors.momentum,
+                    title: "Siri Shortcuts",
+                    content: "Use Siri to start your check-in, view your streak, or hear today's win — completely hands-free. Say \"Start my check-in on Earned\" or \"How's my streak on Earned\" to get started."
+                )
+
+                sectionCard(
                     icon: "envelope.fill",
                     iconColor: EarnedColors.accent,
                     title: "Feedback",

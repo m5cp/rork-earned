@@ -70,6 +70,7 @@ struct TodayView: View {
                 glowPulse = true
             }
             arrowPulse = true
+            viewModel.startLiveActivity()
         }
         .sensoryFeedback(.selection, trigger: viewModel.currentCardIndex)
     }

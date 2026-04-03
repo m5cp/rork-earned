@@ -59,6 +59,20 @@ struct PrivacyPolicyView: View {
                 )
 
                 sectionCard(
+                    icon: "rectangle.on.rectangle.angled",
+                    iconColor: EarnedColors.streak,
+                    title: "Widgets & Live Activities",
+                    content: "Home Screen widgets and Live Activities display your streak and check-in progress using shared on-device storage (App Groups). No data leaves your device."
+                )
+
+                sectionCard(
+                    icon: "mic.fill",
+                    iconColor: EarnedColors.momentum,
+                    title: "Siri & Shortcuts",
+                    content: "Siri integration lets you start check-ins or view your streak by voice. Siri processes your request on-device. MVM Earned does not send any data to external servers through Siri."
+                )
+
+                sectionCard(
                     icon: "arrow.triangle.2.circlepath",
                     iconColor: .secondary,
                     title: "Policy Updates",

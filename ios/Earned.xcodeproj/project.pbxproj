@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		XXFCE7150CF1651487D4A8XX /* EarnedWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = XX0E74A42DD9E0640600FDXX /* EarnedWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		105FC58A2E9EAD3200EA8BCF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,29 +25,54 @@
 			remoteGlobalIDString = 105FC5792E9EAD3100EA8BCF;
 			remoteInfo = Earned;
 		};
+		XX4AF1B4233F3DE7AA9B60XX /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 105FC5722E9EAD3100EA8BCF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = XX1ECF0DC6896AEF64C700XX;
+			remoteInfo = EarnedWidget;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		XXA5F5E4D58A3A93A986E2XX /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				XXFCE7150CF1651487D4A8XX /* EarnedWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		105FC57A2E9EAD3100EA8BCF /* Earned.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Earned.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		105FC5892E9EAD3200EA8BCF /* EarnedTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EarnedTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		105FC5932E9EAD3200EA8BCF /* EarnedUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EarnedUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		XX0E74A42DD9E0640600FDXX /* EarnedWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EarnedWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		XX9F68E8520A952B317E7AXX /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = XX1ECF0DC6896AEF64C700XX /* EarnedWidget */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		105FC57C2E9EAD3100EA8BCF /* Earned */ = {
+		XX24D1ADC1A4262B6959A5XX /* EarnedWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Earned;
+			path = EarnedWidget;
 			sourceTree = "<group>";
-		};
-		105FC58C2E9EAD3200EA8BCF /* EarnedTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = EarnedTests;
-			sourceTree = "<group>";
-		};
-		105FC5962E9EAD3200EA8BCF /* EarnedUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = EarnedUITests;
-			sourceTree = "<group>";
+			exceptions = (
+				XX9F68E8520A952B317E7AXX /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+			);
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -69,7 +98,32 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		XX75B8358D2242CEB782C5XX /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		105FC57C2E9EAD3100EA8BCF /* Earned */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Earned;
+			sourceTree = "<group>";
+		};
+		105FC58C2E9EAD3200EA8BCF /* EarnedTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = EarnedTests;
+			sourceTree = "<group>";
+		};
+		105FC5962E9EAD3200EA8BCF /* EarnedUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = EarnedUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXGroup section */
 		105FC5712E9EAD3100EA8BCF = {
@@ -79,6 +133,7 @@
 				105FC58C2E9EAD3200EA8BCF /* EarnedTests */,
 				105FC5962E9EAD3200EA8BCF /* EarnedUITests */,
 				105FC57B2E9EAD3100EA8BCF /* Products */,
+				XX24D1ADC1A4262B6959A5XX /* EarnedWidget */,
 			);
 			sourceTree = "<group>";
 		};
@@ -88,6 +143,7 @@
 				105FC57A2E9EAD3100EA8BCF /* Earned.app */,
 				105FC5892E9EAD3200EA8BCF /* EarnedTests.xctest */,
 				105FC5932E9EAD3200EA8BCF /* EarnedUITests.xctest */,
+				XX0E74A42DD9E0640600FDXX /* EarnedWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -102,10 +158,12 @@
 				105FC5762E9EAD3100EA8BCF /* Sources */,
 				105FC5772E9EAD3100EA8BCF /* Frameworks */,
 				105FC5782E9EAD3100EA8BCF /* Resources */,
+				XXA5F5E4D58A3A93A986E2XX /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				XX6822DBE727057939308CXX /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				105FC57C2E9EAD3100EA8BCF /* Earned */,
@@ -163,6 +221,26 @@
 			productReference = 105FC5932E9EAD3200EA8BCF /* EarnedUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		XX1ECF0DC6896AEF64C700XX /* EarnedWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = XX1CFBB7D9AF8D34AF45E4XX /* Build configuration list for PBXNativeTarget "EarnedWidget" */;
+			buildPhases = (
+				XXE0FD6AFA7551401BFCEBXX /* Sources */,
+				XX75B8358D2242CEB782C5XX /* Frameworks */,
+				XX8DEE49FEB104205DDA8DXX /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EarnedWidget;
+			productName = EarnedWidget;
+			productReference = XX0E74A42DD9E0640600FDXX /* EarnedWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+			fileSystemSynchronizedGroups = (
+				XX24D1ADC1A4262B6959A5XX /* EarnedWidget */,
+			);
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -204,6 +282,7 @@
 				105FC5792E9EAD3100EA8BCF /* Earned */,
 				105FC5882E9EAD3200EA8BCF /* EarnedTests */,
 				105FC5922E9EAD3200EA8BCF /* EarnedUITests */,
+				XX1ECF0DC6896AEF64C700XX /* EarnedWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -224,6 +303,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		105FC5912E9EAD3200EA8BCF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		XX8DEE49FEB104205DDA8DXX /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -254,6 +340,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		XXE0FD6AFA7551401BFCEBXX /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -266,6 +359,11 @@
 			isa = PBXTargetDependency;
 			target = 105FC5792E9EAD3100EA8BCF /* Earned */;
 			targetProxy = 105FC5942E9EAD3200EA8BCF /* PBXContainerItemProxy */;
+		};
+		XX6822DBE727057939308CXX /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = XX1ECF0DC6896AEF64C700XX /* EarnedWidget */;
+			targetProxy = XX4AF1B4233F3DE7AA9B60XX /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -396,6 +494,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Earned/Earned.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -406,6 +505,7 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "Take a photo for your share card background";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Save your share card to Photos";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Choose a photo for your share card background";
+				INFOPLIST_KEY_NSSiriUsageDescription = "Use Siri to start your daily check-in or view your streak.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -434,6 +534,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Earned/Earned.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -444,6 +545,7 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "Take a photo for your share card background";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Save your share card to Photos";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Choose a photo for your share card background";
+				INFOPLIST_KEY_NSSiriUsageDescription = "Use Siri to start your daily check-in or view your streak.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -551,6 +653,52 @@
 			};
 			name = Release;
 		};
+		XX33072DFFDC5273AC6EEEXX /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = EarnedWidget/EarnedWidget.entitlements;
+				PRODUCT_BUNDLE_IDENTIFIER = app.rork.gx2dk8ck1m7fem37nzjyi.earnedwidget;
+				PRODUCT_NAME = EarnedWidget;
+				SWIFT_VERSION = 5.0;
+				SDKROOT = iphoneos;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EarnedWidget/Info.plist;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 1.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				INFOPLIST_KEY_CFBundleDisplayName = "$(PRODUCT_NAME)";
+			};
+			name = Debug;
+		};
+		XXB948D31A003479CE61B3XX /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = EarnedWidget/EarnedWidget.entitlements;
+				PRODUCT_BUNDLE_IDENTIFIER = app.rork.gx2dk8ck1m7fem37nzjyi.earnedwidget;
+				PRODUCT_NAME = EarnedWidget;
+				SWIFT_VERSION = 5.0;
+				SDKROOT = iphoneos;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EarnedWidget/Info.plist;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				MARKETING_VERSION = 1.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				INFOPLIST_KEY_CFBundleDisplayName = "$(PRODUCT_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -586,6 +734,15 @@
 			buildConfigurations = (
 				105FC5A42E9EAD3200EA8BCF /* Debug */,
 				105FC5A52E9EAD3200EA8BCF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		XX1CFBB7D9AF8D34AF45E4XX /* Build configuration list for PBXNativeTarget "EarnedWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				XX33072DFFDC5273AC6EEEXX /* Debug */,
+				XXB948D31A003479CE61B3XX /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

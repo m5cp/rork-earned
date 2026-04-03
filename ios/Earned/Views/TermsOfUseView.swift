@@ -66,6 +66,13 @@ struct TermsOfUseView: View {
                 )
 
                 sectionCard(
+                    icon: "rectangle.on.rectangle.angled",
+                    iconColor: EarnedColors.streak,
+                    title: "Widgets, Live Activities & Siri",
+                    content: "MVM Earned offers Home Screen widgets, Lock Screen widgets, Live Activities, and Siri Shortcuts. These features use on-device App Groups to share data between the app and system extensions. No data is transmitted externally. Siri processes voice commands locally."
+                )
+
+                sectionCard(
                     icon: "arrow.triangle.2.circlepath",
                     iconColor: EarnedColors.momentum,
                     title: "Modifications",
