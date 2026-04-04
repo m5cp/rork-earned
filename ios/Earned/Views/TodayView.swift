@@ -10,6 +10,8 @@ struct TodayView: View {
     @State private var cardTransition: Bool = false
     @State private var arrowPulse: Bool = false
     @State private var glowPulse: Bool = false
+    @State private var showSwipeHint: Bool = false
+    @AppStorage("hasSeenSwipeHint") private var hasSeenSwipeHint: Bool = false
 
     private var isWide: Bool { horizontalSizeClass == .regular }
     private var cardMaxWidth: CGFloat { isWide ? 480 : .infinity }
@@ -71,6 +73,21 @@ struct TodayView: View {
             }
             arrowPulse = true
             viewModel.startLiveActivity()
+            if !hasSeenSwipeHint && !reduceMotion {
+                Task {
+                    try? await Task.sleep(for: .milliseconds(800))
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) {
+                        showSwipeHint = true
+                        dragOffset = CGSize(width: 60, height: 0)
+                    }
+                    try? await Task.sleep(for: .milliseconds(600))
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                        dragOffset = .zero
+                        showSwipeHint = false
+                    }
+                    hasSeenSwipeHint = true
+                }
+            }
         }
         .sensoryFeedback(.selection, trigger: viewModel.currentCardIndex)
     }
@@ -202,9 +219,11 @@ struct TodayView: View {
                     .gesture(
                         DragGesture()
                             .onChanged { value in
+                                guard !showSwipeHint else { return }
                                 dragOffset = value.translation
                             }
                             .onEnded { value in
+                                guard !showSwipeHint else { return }
                                 handleSwipe(value)
                             }
                     )
@@ -218,23 +237,30 @@ struct TodayView: View {
 
     private var swipeHints: some View {
         HStack(spacing: 0) {
-            VStack(spacing: 8) {
-                ZStack {
-                    Circle()
-                        .fill(Color.white.opacity(0.06))
-                        .frame(width: 52, height: 52)
+            Button {
+                guard !showSwipeHint else { return }
+                swipeCard(direction: .left)
+            } label: {
+                VStack(spacing: 8) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white.opacity(0.06))
+                            .frame(width: 52, height: 52)
 
-                    Image(systemName: "arrowshape.left.fill")
-                        .font(.system(size: 22, weight: .heavy))
-                        .offset(x: arrowPulse ? -3 : 0)
-                        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: arrowPulse)
+                        Image(systemName: "arrowshape.left.fill")
+                            .font(.system(size: 22, weight: .heavy))
+                            .offset(x: arrowPulse ? -3 : 0)
+                            .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: arrowPulse)
+                    }
+                    Text("SKIP")
+                        .font(.caption2.weight(.black))
+                        .tracking(2)
                 }
-                Text("SKIP")
-                    .font(.caption2.weight(.black))
-                    .tracking(2)
             }
+            .buttonStyle(.plain)
             .foregroundStyle(.white.opacity(0.8))
             .opacity(dragOffset.width < -20 ? 0.2 : 1)
+            .sensoryFeedback(.impact(weight: .light), trigger: viewModel.currentCardIndex)
 
             Spacer()
 
@@ -247,23 +273,30 @@ struct TodayView: View {
 
             Spacer()
 
-            VStack(spacing: 8) {
-                ZStack {
-                    Circle()
-                        .fill(EarnedColors.earned.opacity(0.15))
-                        .frame(width: 52, height: 52)
+            Button {
+                guard !showSwipeHint else { return }
+                swipeCard(direction: .right)
+            } label: {
+                VStack(spacing: 8) {
+                    ZStack {
+                        Circle()
+                            .fill(EarnedColors.earned.opacity(0.15))
+                            .frame(width: 52, height: 52)
 
-                    Image(systemName: "arrowshape.right.fill")
-                        .font(.system(size: 22, weight: .heavy))
-                        .offset(x: arrowPulse ? 3 : 0)
-                        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: arrowPulse)
+                        Image(systemName: "arrowshape.right.fill")
+                            .font(.system(size: 22, weight: .heavy))
+                            .offset(x: arrowPulse ? 3 : 0)
+                            .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: arrowPulse)
+                    }
+                    Text("LOG IT")
+                        .font(.caption2.weight(.black))
+                        .tracking(2)
                 }
-                Text("LOG IT")
-                    .font(.caption2.weight(.black))
-                    .tracking(2)
             }
+            .buttonStyle(.plain)
             .foregroundStyle(EarnedColors.earned)
             .opacity(dragOffset.width > 20 ? 0.2 : 1)
+            .sensoryFeedback(.impact(weight: .medium), trigger: viewModel.currentCardIndex)
         }
         .opacity(appeared ? 1 : 0)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.35), value: appeared)
