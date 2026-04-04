@@ -3,7 +3,9 @@ import UserNotifications
 
 struct SettingsView: View {
     let viewModel: EarnedViewModel
+    var store: StoreViewModel
     @State private var showResetAlert: Bool = false
+    @State private var showSubscription: Bool = false
     @State private var nudgeEnabled: Bool = false
     @State private var nudgeTime: Date = {
         var components = DateComponents()
@@ -22,6 +24,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
+                subscriptionSection
                 dailyNudgeSection
                 weeklyMomentumSection
                 calendarSyncSection
@@ -63,6 +66,9 @@ struct SettingsView: View {
             } message: {
                 Text("Enable calendar access in Settings to sync your earned sessions.")
             }
+            .sheet(isPresented: $showSubscription) {
+                SubscriptionView(store: store)
+            }
             .alert("Notifications Disabled", isPresented: $notificationDenied) {
                 Button("Open Settings") {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -75,6 +81,56 @@ struct SettingsView: View {
             } message: {
                 Text("Enable notifications in Settings to receive nudges.")
             }
+        }
+    }
+
+    private var subscriptionSection: some View {
+        Section {
+            if store.isPremium {
+                HStack(spacing: 14) {
+                    Image(systemName: "crown.fill")
+                        .font(.body)
+                        .foregroundStyle(EarnedColors.streak)
+                        .frame(width: 28)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Earned Pro")
+                            .font(.subheadline.weight(.semibold))
+                        Text("You have full access. Thank you!")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.vertical, 4)
+            } else {
+                Button {
+                    showSubscription = true
+                } label: {
+                    HStack(spacing: 14) {
+                        Image(systemName: "trophy.fill")
+                            .font(.body)
+                            .foregroundStyle(EarnedColors.accent)
+                            .frame(width: 28)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Upgrade to Pro")
+                                .font(.subheadline.weight(.semibold))
+                            Text("Unlock the full Earned experience")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+        } header: {
+            Text("Subscription")
         }
     }
 

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		XX298127CFBB2CF3FA631BXX /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = XXDCC169DE7B2F3C1C8B10XX /* RevenueCat */; };
 		XXFCE7150CF1651487D4A8XX /* EarnedWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = XX0E74A42DD9E0640600FDXX /* EarnedWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -66,13 +67,20 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		XX24D1ADC1A4262B6959A5XX /* EarnedWidget */ = {
+		105FC57C2E9EAD3100EA8BCF /* Earned */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = EarnedWidget;
+			path = Earned;
 			sourceTree = "<group>";
-			exceptions = (
-				XX9F68E8520A952B317E7AXX /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
-			);
+		};
+		105FC58C2E9EAD3200EA8BCF /* EarnedTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = EarnedTests;
+			sourceTree = "<group>";
+		};
+		105FC5962E9EAD3200EA8BCF /* EarnedUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = EarnedUITests;
+			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -81,6 +89,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				XX298127CFBB2CF3FA631BXX /* RevenueCat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -108,20 +117,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		105FC57C2E9EAD3100EA8BCF /* Earned */ = {
+		XX24D1ADC1A4262B6959A5XX /* EarnedWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Earned;
+			path = EarnedWidget;
 			sourceTree = "<group>";
-		};
-		105FC58C2E9EAD3200EA8BCF /* EarnedTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = EarnedTests;
-			sourceTree = "<group>";
-		};
-		105FC5962E9EAD3200EA8BCF /* EarnedUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = EarnedUITests;
-			sourceTree = "<group>";
+			exceptions = (
+				XX9F68E8520A952B317E7AXX /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+			);
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -170,6 +172,7 @@
 			);
 			name = Earned;
 			packageProductDependencies = (
+				XXDCC169DE7B2F3C1C8B10XX /* RevenueCat */,
 			);
 			productName = Earned;
 			productReference = 105FC57A2E9EAD3100EA8BCF /* Earned.app */;
@@ -283,6 +286,9 @@
 				105FC5882E9EAD3200EA8BCF /* EarnedTests */,
 				105FC5922E9EAD3200EA8BCF /* EarnedUITests */,
 				XX1ECF0DC6896AEF64C700XX /* EarnedWidget */,
+			);
+			packageReferences = (
+				XX4AC81916604C4344ADC0XX /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 			);
 		};
 /* End PBXProject section */
@@ -748,6 +754,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		XX4AC81916604C4344ADC0XX /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		XXDCC169DE7B2F3C1C8B10XX /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = XX4AC81916604C4344ADC0XX /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 105FC5722E9EAD3100EA8BCF /* Project object */;
 }

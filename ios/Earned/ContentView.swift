@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var viewModel = EarnedViewModel()
+    @State private var storeViewModel = StoreViewModel()
     @State private var selectedTab: Int = 0
     @State private var showSplash: Bool = true
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
@@ -35,7 +36,7 @@ struct ContentView: View {
             }
 
             Tab("Settings", systemImage: "gearshape.fill", value: 2) {
-                SettingsView(viewModel: viewModel)
+                SettingsView(viewModel: viewModel, store: storeViewModel)
             }
         }
         .tint(EarnedColors.accent)
