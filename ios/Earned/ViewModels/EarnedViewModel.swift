@@ -171,6 +171,44 @@ class EarnedViewModel {
         entries.values.reduce(0) { $0 + $1.earnedCount }
     }
 
+    var totalComebacks: Int {
+        entries.values.filter(\.isComeback).count
+    }
+
+    var currentLevel: Int {
+        MilestoneLibrary.level(for: totalWinsEarned)
+    }
+
+    var levelTitle: String {
+        MilestoneLibrary.levelTitle(for: currentLevel)
+    }
+
+    var levelProgress: Double {
+        MilestoneLibrary.progressToNextLevel(totalWins: totalWinsEarned)
+    }
+
+    var winsToNextLevel: Int {
+        MilestoneLibrary.winsToNextLevel(totalWins: totalWinsEarned)
+    }
+
+    var unlockedMilestones: [Milestone] {
+        MilestoneLibrary.unlockedMilestones(
+            longestStreak: longestStreak,
+            totalWins: totalWinsEarned,
+            totalDays: totalDaysCheckedIn,
+            comebacks: totalComebacks
+        )
+    }
+
+    var nextMilestones: [Milestone] {
+        MilestoneLibrary.nextMilestones(
+            longestStreak: longestStreak,
+            totalWins: totalWinsEarned,
+            totalDays: totalDaysCheckedIn,
+            comebacks: totalComebacks
+        )
+    }
+
     var weeklyEarnedCount: Int {
         let calendar = Calendar.current
         var total = 0
