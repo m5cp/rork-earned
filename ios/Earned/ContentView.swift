@@ -5,13 +5,26 @@ struct ContentView: View {
     @State private var storeViewModel = StoreViewModel()
     @State private var selectedTab: Int = 0
     @State private var showSplash: Bool = true
+    @State private var showMilestoneCelebration: Bool = false
+    @State private var showPaywallAfterFirstCheckIn: Bool = false
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
+    @AppStorage("hasSeenFirstCheckInPaywall") private var hasSeenFirstCheckInPaywall: Bool = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
-            mainContent
-                .opacity(showSplash ? 0 : 1)
+            if !hasCompletedOnboarding && showSplash == false {
+                OnboardingView {
+                    withAnimation(.smooth(duration: 0.5)) {
+                        hasCompletedOnboarding = true
+                    }
+                }
+                .transition(.opacity)
+            } else {
+                mainContent
+                    .opacity(showSplash ? 0 : 1)
+            }
 
             if showSplash {
                 SplashView {
@@ -21,8 +34,47 @@ struct ContentView: View {
                 }
                 .transition(.opacity)
             }
+
+            if showMilestoneCelebration, let milestone = viewModel.newlyUnlockedMilestone {
+                MilestoneCelebrationView(
+                    milestone: milestone,
+                    onDismiss: {
+                        withAnimation(.smooth(duration: 0.3)) {
+                            showMilestoneCelebration = false
+                            viewModel.dismissMilestoneCelebration()
+                        }
+                    },
+                    onShare: {
+                        withAnimation(.smooth(duration: 0.3)) {
+                            showMilestoneCelebration = false
+                            viewModel.dismissMilestoneCelebration()
+                        }
+                    }
+                )
+                .transition(.opacity)
+                .zIndex(100)
+            }
         }
         .preferredColorScheme(appTheme.colorScheme)
+        .onChange(of: viewModel.newlyUnlockedMilestone?.id) { _, newValue in
+            if newValue != nil {
+                withAnimation(.smooth(duration: 0.3)) {
+                    showMilestoneCelebration = true
+                }
+            }
+        }
+        .onChange(of: viewModel.summaryDismissed) { _, dismissed in
+            if dismissed && !hasSeenFirstCheckInPaywall && !storeViewModel.isPremium {
+                hasSeenFirstCheckInPaywall = true
+                Task {
+                    try? await Task.sleep(for: .milliseconds(800))
+                    showPaywallAfterFirstCheckIn = true
+                }
+            }
+        }
+        .sheet(isPresented: $showPaywallAfterFirstCheckIn) {
+            SubscriptionView(store: storeViewModel)
+        }
     }
 
     private var mainContent: some View {

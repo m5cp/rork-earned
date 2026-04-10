@@ -124,6 +124,8 @@ class EarnedViewModel {
 
     var showSayItOutLoud: Bool = false
     var summaryDismissed: Bool = false
+    var newlyUnlockedMilestone: Milestone?
+    private var previousMilestoneIDs: Set<String> = []
 
     var sayItOutLoudStatement: String {
         let raw = SayItOutLoudLibrary.statement(for: todayEarnedWins)
@@ -362,6 +364,21 @@ class EarnedViewModel {
         }
 
         syncWidgetData()
+        previousMilestoneIDs = Set(unlockedMilestones.map(\.id))
+    }
+
+    func checkForNewMilestones() {
+        let currentIDs = Set(unlockedMilestones.map(\.id))
+        let newIDs = currentIDs.subtracting(previousMilestoneIDs)
+        if let newID = newIDs.first,
+           let milestone = unlockedMilestones.first(where: { $0.id == newID }) {
+            newlyUnlockedMilestone = milestone
+        }
+        previousMilestoneIDs = currentIDs
+    }
+
+    func dismissMilestoneCelebration() {
+        newlyUnlockedMilestone = nil
     }
 
     func prepareTodayWins() {
@@ -399,6 +416,7 @@ class EarnedViewModel {
             syncToCalendarIfNeeded()
             syncWidgetData()
             CheckInActivityService.endSession()
+            checkForNewMilestones()
         }
     }
 
