@@ -9,6 +9,8 @@ struct DayCompleteView: View {
     private var earnedCount: Int { viewModel.todayEarnedCount }
 
     private var encouragement: String {
+        if viewModel.isPersonalBest { return "New personal best!" }
+        if viewModel.tiedPersonalBest { return "Matched your best!" }
         let streak = viewModel.currentStreak
         if streak >= 30 { return "Unstoppable." }
         if streak >= 14 { return "Momentum is real." }
@@ -16,6 +18,10 @@ struct DayCompleteView: View {
         if streak >= 3 { return "Building something." }
         if earnedCount >= 4 { return "Strong session." }
         return "You showed up."
+    }
+
+    private var quote: (text: String, author: String) {
+        MotivationalQuoteLibrary.randomQuote()
     }
 
     var body: some View {
@@ -29,7 +35,17 @@ struct DayCompleteView: View {
                     heroSection
                         .padding(.bottom, 32)
 
+                    if viewModel.isPersonalBest || viewModel.tiedPersonalBest {
+                        personalBestBadge
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 20)
+                    }
+
                     statsRow
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
+
+                    quoteCard
                         .padding(.horizontal, 24)
                         .padding(.bottom, 24)
 
@@ -104,7 +120,7 @@ struct DayCompleteView: View {
                     )
                     .frame(width: 88, height: 88)
 
-                Image(systemName: "checkmark")
+                Image(systemName: viewModel.isPersonalBest ? "trophy.fill" : "checkmark")
                     .font(.system(size: 34, weight: .black))
                     .foregroundStyle(.white)
             }
@@ -128,6 +144,39 @@ struct DayCompleteView: View {
             .offset(y: reduceMotion ? 0 : (appeared ? 0 : 12))
             .animation(reduceMotion ? nil : .easeOut(duration: 0.5).delay(0.15), value: appeared)
         }
+    }
+
+    private var personalBestBadge: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "star.circle.fill")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(EarnedColors.streak)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(viewModel.isPersonalBest ? "NEW PERSONAL BEST" : "TIED PERSONAL BEST")
+                    .font(.caption2.weight(.heavy))
+                    .tracking(1.5)
+                    .foregroundStyle(EarnedColors.streak)
+
+                Text("\(earnedCount) wins in a single session")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+
+            Spacer()
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(EarnedColors.streak.opacity(0.12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .strokeBorder(EarnedColors.streak.opacity(0.25), lineWidth: 1)
+                )
+        )
+        .opacity(appeared ? 1 : 0)
+        .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.2), value: appeared)
     }
 
     private var statsRow: some View {
@@ -171,6 +220,31 @@ struct DayCompleteView: View {
         Rectangle()
             .fill(Color.white.opacity(0.15))
             .frame(width: 0.5, height: 28)
+    }
+
+    private var quoteCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Image(systemName: "quote.opening")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(EarnedColors.accentBright.opacity(0.6))
+
+            Text(quote.text)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.white.opacity(0.85))
+                .lineSpacing(3)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text("— \(quote.author)")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.45))
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.white.opacity(0.06))
+        .clipShape(.rect(cornerRadius: 16))
+        .opacity(appeared ? 1 : 0)
+        .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.28), value: appeared)
     }
 
     private var levelProgressCard: some View {

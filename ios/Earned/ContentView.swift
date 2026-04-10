@@ -43,16 +43,24 @@ struct ContentView: View {
                             showMilestoneCelebration = false
                             viewModel.dismissMilestoneCelebration()
                         }
+                        triggerReviewPromptIfNeeded()
                     },
                     onShare: {
                         withAnimation(.smooth(duration: 0.3)) {
                             showMilestoneCelebration = false
                             viewModel.dismissMilestoneCelebration()
                         }
+                        triggerReviewPromptIfNeeded()
                     }
                 )
                 .transition(.opacity)
                 .zIndex(100)
+            }
+
+            if viewModel.showWeeklyReflection {
+                WeeklyReflectionView(viewModel: viewModel)
+                    .transition(.opacity)
+                    .zIndex(99)
             }
         }
         .preferredColorScheme(appTheme.colorScheme)
@@ -64,12 +72,25 @@ struct ContentView: View {
             }
         }
         .onChange(of: viewModel.summaryDismissed) { _, dismissed in
-            if dismissed && !hasSeenFirstCheckInPaywall && !storeViewModel.isPremium {
-                hasSeenFirstCheckInPaywall = true
-                Task {
-                    try? await Task.sleep(for: .milliseconds(800))
-                    showPaywallAfterFirstCheckIn = true
+            if dismissed {
+                if !hasSeenFirstCheckInPaywall && !storeViewModel.isPremium {
+                    hasSeenFirstCheckInPaywall = true
+                    Task {
+                        try? await Task.sleep(for: .milliseconds(800))
+                        showPaywallAfterFirstCheckIn = true
+                    }
                 }
+
+                if viewModel.isEndOfWeek && storeViewModel.isPremium {
+                    Task {
+                        try? await Task.sleep(for: .milliseconds(1200))
+                        withAnimation(.smooth(duration: 0.3)) {
+                            viewModel.showWeeklyReflection = true
+                        }
+                    }
+                }
+
+                triggerReviewPromptIfNeeded()
             }
         }
         .sheet(isPresented: $showPaywallAfterFirstCheckIn) {
@@ -135,5 +156,13 @@ struct ContentView: View {
         .animation(reduceMotion ? .none : .smooth(duration: 0.4), value: viewModel.showSummary)
         .animation(reduceMotion ? .none : .smooth(duration: 0.4), value: viewModel.showSayItOutLoud)
         .animation(reduceMotion ? .none : .smooth(duration: 0.4), value: viewModel.summaryDismissed)
+    }
+
+    private func triggerReviewPromptIfNeeded() {
+        ReviewPromptService.requestReviewIfAppropriate(
+            streak: viewModel.currentStreak,
+            level: viewModel.currentLevel,
+            milestonesUnlocked: viewModel.unlockedMilestones.count
+        )
     }
 }

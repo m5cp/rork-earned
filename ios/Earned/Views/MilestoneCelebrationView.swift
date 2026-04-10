@@ -149,6 +149,7 @@ struct MilestoneCelebrationView: View {
                 }
             }
         }
-        .sensoryFeedback(.success, trigger: appeared)
+        .sensoryFeedback(.impact(weight: .heavy, intensity: 1.0), trigger: appeared)
+        .sensoryFeedback(.success, trigger: ringRotation)
     }
 }

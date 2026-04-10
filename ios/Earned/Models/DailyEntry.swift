@@ -8,18 +8,20 @@ nonisolated struct DailyEntry: Codable, Sendable, Identifiable {
     var sayItOutLoudCompleted: Bool
     var isComeback: Bool
     var journalNote: String?
+    var weeklyReflection: String?
 
     var id: String { date }
 
     var earnedCount: Int { earnedWinIDs.count }
 
-    init(date: String, earnedWinIDs: [String], skippedWinIDs: [String], sayItOutLoudStatement: String? = nil, sayItOutLoudCompleted: Bool = false, isComeback: Bool = false) {
+    init(date: String, earnedWinIDs: [String], skippedWinIDs: [String], sayItOutLoudStatement: String? = nil, sayItOutLoudCompleted: Bool = false, isComeback: Bool = false, weeklyReflection: String? = nil) {
         self.date = date
         self.earnedWinIDs = earnedWinIDs
         self.skippedWinIDs = skippedWinIDs
         self.sayItOutLoudStatement = sayItOutLoudStatement
         self.sayItOutLoudCompleted = sayItOutLoudCompleted
         self.isComeback = isComeback
+        self.weeklyReflection = weeklyReflection
     }
 
     static func dateKey(for date: Date = .now) -> String {

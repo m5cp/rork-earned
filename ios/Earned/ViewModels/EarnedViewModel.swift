@@ -126,6 +126,8 @@ class EarnedViewModel {
     var summaryDismissed: Bool = false
     var newlyUnlockedMilestone: Milestone?
     private var previousMilestoneIDs: Set<String> = []
+    var showWeeklyReflection: Bool = false
+    var weeklyReflectionText: String = ""
 
     var sayItOutLoudStatement: String {
         let raw = SayItOutLoudLibrary.statement(for: todayEarnedWins)
@@ -519,6 +521,48 @@ class EarnedViewModel {
 
     var maxDailyEarned: Int {
         entries.values.map(\.earnedCount).max() ?? 1
+    }
+
+    var isPersonalBest: Bool {
+        guard let today = todayEntry else { return false }
+        let todayCount = today.earnedCount
+        guard todayCount > 0 else { return false }
+        let previousBest = entries.values
+            .filter { $0.date != todayKey }
+            .map(\.earnedCount)
+            .max() ?? 0
+        return todayCount > previousBest
+    }
+
+    var tiedPersonalBest: Bool {
+        guard let today = todayEntry else { return false }
+        let todayCount = today.earnedCount
+        guard todayCount > 0 else { return false }
+        let previousBest = entries.values
+            .filter { $0.date != todayKey }
+            .map(\.earnedCount)
+            .max() ?? 0
+        return todayCount == previousBest && previousBest > 0
+    }
+
+    var isEndOfWeek: Bool {
+        let weekday = Calendar.current.component(.weekday, from: .now)
+        return weekday == 1
+    }
+
+    func saveWeeklyReflection() {
+        guard !weeklyReflectionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        var entry = entries[todayKey] ?? DailyEntry(date: todayKey, earnedWinIDs: [], skippedWinIDs: [])
+        entry.weeklyReflection = weeklyReflectionText.trimmingCharacters(in: .whitespacesAndNewlines)
+        entries[todayKey] = entry
+        saveEntries()
+        showWeeklyReflection = false
+        weeklyReflectionText = ""
+    }
+
+    func dismissWeeklyReflection() {
+        showWeeklyReflection = false
+        weeklyReflectionText = ""
     }
 
     private func loadEntries() {
