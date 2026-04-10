@@ -142,18 +142,12 @@ struct OnboardingView: View {
     }
 
     private var skipButton: some View {
-        Group {
-            if currentPage < pages.count - 1 {
-                Button {
-                    onComplete()
-                } label: {
-                    Text("Skip")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white.opacity(0.5))
-                }
-            } else {
-                Color.clear.frame(height: 20)
-            }
+        Button {
+            onComplete()
+        } label: {
+            Text("Skip")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.5))
         }
     }
 
