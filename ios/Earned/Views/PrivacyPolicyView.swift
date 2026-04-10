@@ -19,8 +19,8 @@ struct PrivacyPolicyView: View {
                 sectionCard(
                     icon: "eye.slash.fill",
                     iconColor: EarnedColors.momentum,
-                    title: "Zero Data Collection",
-                    content: "No analytics, no tracking pixels, no third-party SDKs. Your usage is completely private and invisible to us."
+                    title: "Minimal Data Collection",
+                    content: "No analytics and no tracking pixels. The only third-party service used is RevenueCat, which processes subscription purchases securely. RevenueCat does not track your app usage or personal content."
                 )
 
                 sectionCard(
@@ -54,8 +54,8 @@ struct PrivacyPolicyView: View {
                 sectionCard(
                     icon: "wifi.slash",
                     iconColor: EarnedColors.momentum,
-                    title: "Fully Offline",
-                    content: "No third-party services, advertising networks, or analytics platforms. The app functions entirely offline."
+                    title: "Works Offline",
+                    content: "No advertising networks or analytics platforms. The app functions offline for all core features. An internet connection is only needed for subscription management."
                 )
 
                 sectionCard(

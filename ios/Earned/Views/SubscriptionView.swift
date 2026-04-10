@@ -202,14 +202,18 @@ struct SubscriptionView: View {
             .foregroundStyle(.secondary)
 
             VStack(spacing: 4) {
-                Text("Cancel anytime. Subscriptions auto-renew unless cancelled at least 24 hours before the end of the current period.")
+                Text("Payment will be charged to your Apple ID account at confirmation of purchase. Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage and cancel your subscriptions in your App Store account settings.")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
                     .multilineTextAlignment(.center)
 
                 HStack(spacing: 16) {
-                    Link("Privacy Policy", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
-                    Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+                    NavigationLink("Privacy Policy") {
+                        PrivacyPolicyView()
+                    }
+                    NavigationLink("Terms of Use") {
+                        TermsOfUseView()
+                    }
                 }
                 .font(.caption2)
                 .foregroundStyle(.secondary)

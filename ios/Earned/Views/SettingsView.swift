@@ -619,7 +619,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("No Tracking")
                         .font(.subheadline.weight(.medium))
-                    Text("No analytics, no third-party SDKs")
+                    Text("No analytics or ad networks")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
