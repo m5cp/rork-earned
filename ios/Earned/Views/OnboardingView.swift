@@ -20,6 +20,18 @@ struct OnboardingView: View {
             "Track your streaks, unlock milestones, and level up as you stay consistent. Small wins compound."
         ),
         (
+            "sparkles",
+            [Color(red: 0.5, green: 0.32, blue: 1.0), Color(red: 0.12, green: 0.72, blue: 0.44)],
+            "AI writes your journal.",
+            "Hate journaling? We get it. After each check-in, AI turns your wins into a personal journal entry — no writing required."
+        ),
+        (
+            "face.smiling.inverse",
+            [Color(red: 0.12, green: 0.72, blue: 0.44), Color(red: 0.22, green: 0.48, blue: 1.0)],
+            "Track how you feel.",
+            "One tap to log your mood. Over time, see patterns between what you earn and how you feel. Simple data, powerful insight."
+        ),
+        (
             "quote.opening",
             [Color(red: 0.5, green: 0.32, blue: 1.0), Color(red: 0.22, green: 0.48, blue: 1.0)],
             "Say it out loud.",

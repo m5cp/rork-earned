@@ -54,9 +54,17 @@ struct DayDetailView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     headerSection
+
+                    if let mood = entry?.mood {
+                        moodBadge(mood)
+                    }
+
                     if !earnedWins.isEmpty {
                         earnedSection
                     }
+
+                    aiJournalDetailSection
+
                     journalSection
                     exportButtons
                 }
@@ -282,6 +290,60 @@ struct DayDetailView: View {
         .opacity(appeared ? 1 : 0)
         .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
         .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.2), value: appeared)
+    }
+
+    private func moodBadge(_ mood: Mood) -> some View {
+        HStack(spacing: 10) {
+            Text(mood.emoji)
+                .font(.title3)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("MOOD")
+                    .font(.caption2.weight(.heavy))
+                    .tracking(1)
+                    .foregroundStyle(.secondary)
+                Text(mood.label)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(mood.color)
+            }
+
+            Spacer()
+        }
+        .padding(14)
+        .background(mood.color.opacity(0.1))
+        .clipShape(.rect(cornerRadius: 14))
+        .opacity(appeared ? 1 : 0)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.08), value: appeared)
+    }
+
+    private var aiJournalDetailSection: some View {
+        Group {
+            if let aiJournal = entry?.aiJournalEntry {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(EarnedColors.momentum)
+
+                        Text("AI JOURNAL")
+                            .font(.caption.weight(.heavy))
+                            .tracking(1.5)
+                            .foregroundStyle(EarnedColors.momentum)
+                    }
+                    .padding(.horizontal, 16)
+
+                    Text(aiJournal)
+                        .font(.body)
+                        .lineSpacing(4)
+                        .padding(16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(.secondarySystemBackground))
+                        .clipShape(.rect(cornerRadius: 16))
+                }
+                .opacity(appeared ? 1 : 0)
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.15), value: appeared)
+            }
+        }
     }
 
     private var exportButtons: some View {

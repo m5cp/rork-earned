@@ -121,11 +121,17 @@ struct ContentView: View {
                 todayFlow
             }
 
-            Tab("Progress", systemImage: "chart.bar.fill", value: 1) {
-                EarnedProgressView(viewModel: viewModel)
+            Tab("Journal", systemImage: "book.fill", value: 1) {
+                NavigationStack {
+                    JournalVaultView(viewModel: viewModel)
+                }
             }
 
-            Tab("Settings", systemImage: "gearshape.fill", value: 2) {
+            Tab("Progress", systemImage: "chart.bar.fill", value: 2) {
+                EarnedProgressView(viewModel: viewModel, gameCenter: gameCenter)
+            }
+
+            Tab("Settings", systemImage: "gearshape.fill", value: 3) {
                 SettingsView(viewModel: viewModel, store: storeViewModel, gameCenter: gameCenter)
             }
         }
@@ -156,9 +162,28 @@ struct ContentView: View {
                     }
                 )
                 .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .trailing)))
+            } else if viewModel.showMoodCheck && !viewModel.moodCheckComplete {
+                MoodCheckView(
+                    onMoodSelected: { mood in
+                        viewModel.saveMood(for: viewModel.todayKey, mood: mood)
+                        withAnimation(reduceMotion ? nil : .smooth(duration: 0.4)) {
+                            viewModel.moodCheckComplete = true
+                            viewModel.showMoodCheck = false
+                            viewModel.showSummary = true
+                        }
+                    },
+                    onSkip: {
+                        withAnimation(reduceMotion ? nil : .smooth(duration: 0.4)) {
+                            viewModel.moodCheckComplete = true
+                            viewModel.showMoodCheck = false
+                            viewModel.showSummary = true
+                        }
+                    }
+                )
+                .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.95)))
             } else if viewModel.showSummary {
                 SummaryView(viewModel: viewModel, onNavigateToProgress: {
-                    selectedTab = 1
+                    selectedTab = 2
                 })
                     .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .trailing)))
             } else if viewModel.checkInComplete && viewModel.summaryDismissed {
@@ -170,6 +195,8 @@ struct ContentView: View {
             }
         }
         .animation(reduceMotion ? .none : .smooth(duration: 0.4), value: viewModel.showComeback)
+        .animation(reduceMotion ? .none : .smooth(duration: 0.4), value: viewModel.showMoodCheck)
+        .animation(reduceMotion ? .none : .smooth(duration: 0.4), value: viewModel.moodCheckComplete)
         .animation(reduceMotion ? .none : .smooth(duration: 0.4), value: viewModel.showSummary)
         .animation(reduceMotion ? .none : .smooth(duration: 0.4), value: viewModel.showSayItOutLoud)
         .animation(reduceMotion ? .none : .smooth(duration: 0.4), value: viewModel.summaryDismissed)

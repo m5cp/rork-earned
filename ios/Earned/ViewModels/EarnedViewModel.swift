@@ -123,6 +123,8 @@ class EarnedViewModel {
     }
 
     var showSayItOutLoud: Bool = false
+    var showMoodCheck: Bool = false
+    var moodCheckComplete: Bool = false
     var summaryDismissed: Bool = false
     var newlyUnlockedMilestone: Milestone?
     private var previousMilestoneIDs: Set<String> = []
@@ -357,6 +359,7 @@ class EarnedViewModel {
             let adjustedCount = comebackAlreadyCounted ? totalResponded - 1 : totalResponded
             checkInComplete = adjustedCount >= cardCount
             if checkInComplete {
+                moodCheckComplete = true
                 showSummary = true
             }
         }
@@ -412,7 +415,7 @@ class EarnedViewModel {
             updateLiveActivity()
         } else {
             checkInComplete = true
-            showSummary = true
+            showMoodCheck = true
             saveEntries()
             refreshNudgeIfNeeded()
             syncToCalendarIfNeeded()
@@ -420,6 +423,12 @@ class EarnedViewModel {
             CheckInActivityService.endSession()
             checkForNewMilestones()
         }
+    }
+
+    func completeMoodAndShowSummary() {
+        showMoodCheck = false
+        moodCheckComplete = true
+        showSummary = true
     }
 
     func logComeback() {
@@ -439,6 +448,8 @@ class EarnedViewModel {
         checkInComplete = false
         showSummary = false
         summaryDismissed = false
+        showMoodCheck = false
+        moodCheckComplete = false
         prepareTodayWins()
         saveEntries()
     }
@@ -478,6 +489,46 @@ class EarnedViewModel {
         entry.journalNote = note.isEmpty ? nil : note
         entries[dateKey] = entry
         saveEntries()
+    }
+
+    func saveMood(for dateKey: String, mood: Mood) {
+        var entry = entries[dateKey] ?? DailyEntry(date: dateKey, earnedWinIDs: [], skippedWinIDs: [])
+        entry.mood = mood
+        entries[dateKey] = entry
+        saveEntries()
+    }
+
+    func saveAIJournalEntry(for dateKey: String, entry journalText: String) {
+        var entry = entries[dateKey] ?? DailyEntry(date: dateKey, earnedWinIDs: [], skippedWinIDs: [])
+        entry.aiJournalEntry = journalText
+        entry.aiJournalGeneratedAt = .now
+        entries[dateKey] = entry
+        saveEntries()
+    }
+
+    var entriesWithJournals: [(key: String, entry: DailyEntry)] {
+        entries.filter { $0.value.aiJournalEntry != nil || $0.value.journalNote != nil }
+            .sorted { $0.key > $1.key }
+            .map { (key: $0.key, entry: $0.value) }
+    }
+
+    var allEntriesSorted: [(key: String, entry: DailyEntry)] {
+        entries.filter { !$0.value.earnedWinIDs.isEmpty }
+            .sorted { $0.key > $1.key }
+            .map { (key: $0.key, entry: $0.value) }
+    }
+
+    var moodHistory: [(date: String, mood: Mood)] {
+        entries.compactMap { key, entry in
+            guard let mood = entry.mood else { return nil }
+            return (date: key, mood: mood)
+        }.sorted { $0.date > $1.date }
+    }
+
+    var averageMood: Double? {
+        let moods = entries.values.compactMap { $0.mood }
+        guard !moods.isEmpty else { return nil }
+        return Double(moods.reduce(0) { $0 + $1.numericValue }) / Double(moods.count)
     }
 
     func earnedWins(for dateKey: String) -> [Win] {

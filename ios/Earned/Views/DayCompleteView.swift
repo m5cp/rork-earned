@@ -6,6 +6,8 @@ struct DayCompleteView: View {
     @State private var glowPulse: Bool = false
     @State private var journalText: String = ""
     @State private var showJournalField: Bool = false
+    @State private var aiAffirmation: String?
+    @State private var isGeneratingAffirmation: Bool = false
     @FocusState private var journalFocused: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -58,6 +60,23 @@ struct DayCompleteView: View {
                             .padding(.bottom, 24)
                     }
 
+                    DailyChallengeCardView(viewModel: viewModel)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
+                        .opacity(appeared ? 1 : 0)
+                        .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
+                        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.28), value: appeared)
+
+                    if aiAffirmation != nil || isGeneratingAffirmation {
+                        affirmationCard
+                            .padding(.horizontal, 24)
+                            .padding(.bottom, 24)
+                    }
+
+                    aiJournalSection
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
+
                     journalSection
                         .padding(.horizontal, 24)
                         .padding(.bottom, 24)
@@ -65,8 +84,26 @@ struct DayCompleteView: View {
                     if let next = viewModel.nextMilestones.first {
                         nextMilestoneCard(next)
                             .padding(.horizontal, 24)
-                            .padding(.bottom, 32)
+                            .padding(.bottom, 24)
                     }
+
+                    TomorrowPreviewView()
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
+                        .opacity(appeared ? 1 : 0)
+                        .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
+                        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.38), value: appeared)
+
+                    MemoryCardView(viewModel: viewModel)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
+                        .opacity(appeared ? 1 : 0)
+                        .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
+                        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.4), value: appeared)
+
+                    streakShieldSection
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
 
                     actionButtons
                         .padding(.horizontal, 24)
@@ -83,6 +120,7 @@ struct DayCompleteView: View {
                 withAnimation(.easeOut(duration: 0.6)) { appeared = true }
                 glowPulse = true
             }
+            generateAffirmationIfNeeded()
         }
     }
 
@@ -445,6 +483,124 @@ struct DayCompleteView: View {
         .opacity(appeared ? 1 : 0)
         .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
         .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.32), value: appeared)
+    }
+
+    private var streakShieldSection: some View {
+        let shieldService = StreakShieldService.shared
+        let remaining = shieldService.shieldsRemaining(isPremium: false)
+
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: "shield.checkered")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(EarnedColors.accentBright)
+
+                Text("STREAK SHIELD")
+                    .font(.caption2.weight(.heavy))
+                    .tracking(1.5)
+                    .foregroundStyle(EarnedColors.accentBright.opacity(0.8))
+            }
+
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(EarnedColors.accent.opacity(0.12))
+                        .frame(width: 40, height: 40)
+
+                    Image(systemName: "shield.lefthalf.filled")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(EarnedColors.accent.opacity(0.7))
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("\(remaining) shield\(remaining == 1 ? "" : "s") available")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(.white)
+
+                    Text("Protects your streak if you miss a day")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.5))
+                }
+
+                Spacer()
+            }
+            .padding(14)
+            .background(.white.opacity(0.06))
+            .clipShape(.rect(cornerRadius: 14))
+        }
+        .opacity(appeared ? 1 : 0)
+        .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.42), value: appeared)
+    }
+
+    private var affirmationCard: some View {
+        Group {
+            if let affirmation = aiAffirmation {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(EarnedColors.streak)
+
+                        Text("TODAY'S AFFIRMATION")
+                            .font(.caption2.weight(.heavy))
+                            .tracking(1.5)
+                            .foregroundStyle(EarnedColors.streak.opacity(0.8))
+                    }
+
+                    Text(affirmation)
+                        .font(.body.weight(.semibold).italic())
+                        .foregroundStyle(.white.opacity(0.9))
+                        .lineSpacing(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.white.opacity(0.06))
+                .clipShape(.rect(cornerRadius: 16))
+            } else if isGeneratingAffirmation {
+                HStack(spacing: 10) {
+                    ProgressView()
+                        .tint(EarnedColors.streak)
+                    Text("Crafting your affirmation...")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.5))
+                }
+                .padding(14)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.white.opacity(0.04))
+                .clipShape(.rect(cornerRadius: 14))
+            }
+        }
+        .opacity(appeared ? 1 : 0)
+        .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.29), value: appeared)
+    }
+
+    private func generateAffirmationIfNeeded() {
+        guard aiAffirmation == nil, !isGeneratingAffirmation else { return }
+        guard !viewModel.todayEarnedWins.isEmpty else { return }
+        isGeneratingAffirmation = true
+        Task {
+            do {
+                let result = try await GroqService.shared.generatePersonalizedAffirmation(
+                    recentWins: viewModel.todayEarnedWins,
+                    mood: viewModel.todayEntry?.mood,
+                    streak: viewModel.currentStreak
+                )
+                aiAffirmation = result
+            } catch {
+                // Silently fail — affirmation is optional
+            }
+            isGeneratingAffirmation = false
+        }
+    }
+
+    private var aiJournalSection: some View {
+        AIJournalView(viewModel: viewModel, dateKey: viewModel.todayKey)
+            .opacity(appeared ? 1 : 0)
+            .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.3), value: appeared)
     }
 
     private var actionButtons: some View {

@@ -47,8 +47,12 @@ struct TodayView: View {
                 header
                     .padding(.top, 12)
 
+                challengeBanner
+                    .padding(.top, 12)
+                    .padding(.horizontal, isWide ? 40 : 24)
+
                 progressIndicator
-                    .padding(.top, 20)
+                    .padding(.top, 16)
                     .padding(.horizontal, isWide ? 40 : 32)
 
                 Spacer()
@@ -162,6 +166,33 @@ struct TodayView: View {
         }
         .opacity(appeared ? 1 : 0)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.4), value: appeared)
+    }
+
+    private var challengeBanner: some View {
+        let challenge = DailyChallenge.forToday()
+        return HStack(spacing: 8) {
+            Image(systemName: challenge.icon)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(challenge.color)
+
+            Text(challenge.title)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.white.opacity(0.7))
+
+            Text("·")
+                .foregroundStyle(.white.opacity(0.3))
+
+            Text(challenge.description)
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.4))
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.white.opacity(0.06))
+        .clipShape(Capsule())
+        .opacity(appeared ? 1 : 0)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.1), value: appeared)
     }
 
     private var progressIndicator: some View {

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct EarnedProgressView: View {
     let viewModel: EarnedViewModel
+    var gameCenter: GameCenterService = GameCenterService.shared
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared: Bool = false
@@ -19,7 +20,46 @@ struct EarnedProgressView: View {
                 if hasAnyData {
                     VStack(spacing: 24) {
                         statsCards
+                        aiQuickActions
+                        moodTrendSection
+                        LeaderboardPreviewView(gameCenter: gameCenter)
                         WeeklyMomentumCardView(viewModel: viewModel)
+
+                        NavigationLink {
+                            WeeklyInsightView(viewModel: viewModel)
+                        } label: {
+                            HStack(spacing: 10) {
+                                ZStack {
+                                    Circle()
+                                        .fill(EarnedColors.accent.opacity(0.15))
+                                        .frame(width: 36, height: 36)
+
+                                    Image(systemName: "brain.head.profile.fill")
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundStyle(EarnedColors.accent)
+                                }
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Weekly AI Insight")
+                                        .font(.subheadline.weight(.bold))
+                                        .foregroundStyle(.primary)
+                                    Text("See patterns in your progress")
+                                        .font(.caption2.weight(.medium))
+                                        .foregroundStyle(.secondary)
+                                }
+
+                                Spacer()
+
+                                Image(systemName: "chevron.right")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .padding(14)
+                            .background(Color(.secondarySystemBackground))
+                            .clipShape(.rect(cornerRadius: 16))
+                        }
+                        .buttonStyle(.plain)
+
                         calendarSection
                         weeklyTrendChart
                     }
@@ -246,6 +286,100 @@ struct EarnedProgressView: View {
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
+    }
+
+    private var aiQuickActions: some View {
+        HStack(spacing: 12) {
+            NavigationLink {
+                CoachChatView(earnedViewModel: viewModel)
+            } label: {
+                HStack(spacing: 10) {
+                    ZStack {
+                        Circle()
+                            .fill(EarnedColors.momentum.opacity(0.15))
+                            .frame(width: 36, height: 36)
+
+                        Image(systemName: "bubble.left.and.text.bubble.right.fill")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(EarnedColors.momentum)
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("AI Coach")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(.primary)
+                        Text("Chat about your progress")
+                            .font(.caption2.weight(.medium))
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(14)
+                .background(Color(.secondarySystemBackground))
+                .clipShape(.rect(cornerRadius: 16))
+            }
+            .buttonStyle(.plain)
+        }
+        .opacity(appeared ? 1 : 0)
+        .offset(y: reduceMotion ? 0 : (appeared ? 0 : 10))
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.05), value: appeared)
+    }
+
+    private var moodTrendSection: some View {
+        let recentMoods = viewModel.moodHistory.prefix(7)
+
+        return Group {
+            if !recentMoods.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "face.smiling")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(EarnedColors.streak)
+
+                        Text("Mood")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(.primary)
+
+                        Spacer()
+
+                        if let avg = viewModel.averageMood {
+                            Text(String(format: "%.1f", avg) + " avg")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.horizontal, 4)
+
+                    HStack(spacing: 8) {
+                        let moodItems = Array(recentMoods.reversed())
+                        ForEach(Array(moodItems.enumerated()), id: \.element.date) { _, item in
+                            VStack(spacing: 6) {
+                                Text(item.mood.emoji)
+                                    .font(.title3)
+
+                                if let date = DailyEntry.date(from: item.date) {
+                                    Text(date, format: .dateTime.weekday(.narrow))
+                                        .font(.caption2.weight(.medium))
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .padding(16)
+                    .background(Color(.secondarySystemBackground))
+                    .clipShape(.rect(cornerRadius: 20))
+                }
+                .opacity(appeared ? 1 : 0)
+                .offset(y: reduceMotion ? 0 : (appeared ? 0 : 10))
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.1), value: appeared)
+            }
+        }
     }
 
     private func dayLabel(_ date: Date) -> String {
