@@ -10,6 +10,8 @@ class GameCenterService {
     var playerDisplayName: String = "Anonymous"
     var isAnonymous: Bool = true
     var showGameCenter: Bool = false
+    var isAuthenticating: Bool = false
+    var authError: String? = nil
 
     private let leaderboardTotalWins = "earned.totalWins"
     private let leaderboardLongestStreak = "earned.longestStreak"
@@ -17,23 +19,32 @@ class GameCenterService {
     private let leaderboardLevel = "earned.level"
 
     func authenticate() {
-        GKLocalPlayer.local.authenticateHandler = { viewController, error in
-            if let vc = viewController {
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let rootVC = windowScene.keyWindow?.rootViewController {
-                    rootVC.present(vc, animated: true)
-                }
-            } else if GKLocalPlayer.local.isAuthenticated {
-                Task { @MainActor in
+        isAuthenticating = true
+        authError = nil
+        GKLocalPlayer.local.authenticateHandler = { [weak self] viewController, error in
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.isAuthenticating = false
+                if let vc = viewController {
+                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                        var presenter = windowScene.keyWindow?.rootViewController
+                        while let presented = presenter?.presentedViewController {
+                            presenter = presented
+                        }
+                        presenter?.present(vc, animated: true)
+                    }
+                } else if GKLocalPlayer.local.isAuthenticated {
                     self.isAuthenticated = true
                     self.playerDisplayName = GKLocalPlayer.local.displayName
                     self.isAnonymous = false
-                }
-            } else {
-                Task { @MainActor in
+                    self.authError = nil
+                } else {
                     self.isAuthenticated = false
                     self.isAnonymous = true
                     self.playerDisplayName = "Anonymous"
+                    if let error {
+                        self.authError = "Sign in via Settings > Game Center on your device."
+                    }
                 }
             }
         }

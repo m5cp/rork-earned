@@ -20,6 +20,7 @@ struct EarnedApp: App {
             ContentView()
                 .onAppear {
                     refreshScheduledNotifications()
+                    GameCenterService.shared.authenticate()
                 }
         }
     }

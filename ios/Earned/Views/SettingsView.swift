@@ -35,18 +35,20 @@ struct SettingsView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 0) {
-                    profileHeader
-                        .padding(.bottom, 20)
+                    profileCard
+                        .padding(.horizontal)
+                        .padding(.bottom, 16)
+                        .padding(.top, 4)
 
                     milestonesPreview
                         .padding(.horizontal)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 16)
 
                     subscriptionCard
                         .padding(.horizontal)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 16)
 
-                    VStack(spacing: 16) {
+                    VStack(spacing: 14) {
                         settingsGroup(title: "Reminders", icon: "bell.fill", iconColor: EarnedColors.accent) {
                             dailyNudgeContent
                             Divider().padding(.leading, 16)
@@ -154,118 +156,102 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Profile Header
+    // MARK: - Profile Card
 
-    private var profileHeader: some View {
-        VStack(spacing: 0) {
+    private var profileCard: some View {
+        VStack(spacing: 16) {
             ZStack {
-                EarnedColors.immersiveGradient
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [EarnedColors.accent.opacity(0.2), EarnedColors.momentum.opacity(0.1), Color.clear],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: 40
+                        )
+                    )
+                    .frame(width: 72, height: 72)
 
-                RadialGradient(
-                    colors: [EarnedColors.momentum.opacity(0.25), Color.clear],
-                    center: .topTrailing,
-                    startRadius: 0,
-                    endRadius: 250
-                )
+                Circle()
+                    .strokeBorder(
+                        AngularGradient(
+                            colors: [EarnedColors.accent, EarnedColors.momentum, EarnedColors.earned, EarnedColors.accent],
+                            center: .center
+                        ),
+                        lineWidth: 2.5
+                    )
+                    .frame(width: 72, height: 72)
 
-                RadialGradient(
-                    colors: [EarnedColors.accent.opacity(0.15), Color.clear],
-                    center: .bottomLeading,
-                    startRadius: 0,
-                    endRadius: 200
-                )
+                Text("\(viewModel.currentLevel)")
+                    .font(.system(size: 28, weight: .black, design: .rounded))
+                    .foregroundStyle(.primary)
+                    .symbolEffect(.bounce, value: levelBounce)
+            }
+            .scaleEffect(appeared ? 1 : 0.7)
+            .opacity(appeared ? 1 : 0)
+            .animation(reduceMotion ? nil : .spring(response: 0.5, dampingFraction: 0.6), value: appeared)
 
-                VStack(spacing: 16) {
-                    ZStack {
-                        Circle()
-                            .fill(.white.opacity(0.08))
-                            .frame(width: 80, height: 80)
+            VStack(spacing: 6) {
+                Text(viewModel.levelTitle.uppercased())
+                    .font(.caption.weight(.heavy))
+                    .tracking(2)
+                    .foregroundStyle(EarnedColors.accent)
 
-                        Circle()
-                            .strokeBorder(
-                                AngularGradient(
-                                    colors: [EarnedColors.accent, EarnedColors.momentum, EarnedColors.earned, EarnedColors.accent],
-                                    center: .center
-                                ),
-                                lineWidth: 3
-                            )
-                            .frame(width: 80, height: 80)
+                if viewModel.currentLevel < 10 {
+                    HStack(spacing: 8) {
+                        GeometryReader { geo in
+                            ZStack(alignment: .leading) {
+                                Capsule()
+                                    .fill(Color(.tertiarySystemFill))
+                                    .frame(height: 6)
 
-                        Text("\(viewModel.currentLevel)")
-                            .font(.system(size: 32, weight: .black, design: .rounded))
-                            .foregroundStyle(.white)
-                            .raisedHeadline()
-                            .symbolEffect(.bounce, value: levelBounce)
-                    }
-                    .scaleEffect(appeared ? 1 : 0.7)
-                    .opacity(appeared ? 1 : 0)
-                    .animation(reduceMotion ? nil : .spring(response: 0.5, dampingFraction: 0.6), value: appeared)
-
-                    VStack(spacing: 6) {
-                        Text(viewModel.levelTitle.uppercased())
-                            .font(.caption.weight(.heavy))
-                            .tracking(2)
-                            .foregroundStyle(EarnedColors.accentBright)
-
-                        if viewModel.currentLevel < 10 {
-                            HStack(spacing: 8) {
-                                GeometryReader { geo in
-                                    ZStack(alignment: .leading) {
-                                        Capsule()
-                                            .fill(.white.opacity(0.15))
-                                            .frame(height: 6)
-
-                                        Capsule()
-                                            .fill(
-                                                LinearGradient(
-                                                    colors: [EarnedColors.accent, EarnedColors.momentum],
-                                                    startPoint: .leading,
-                                                    endPoint: .trailing
-                                                )
-                                            )
-                                            .frame(width: max(6, geo.size.width * viewModel.levelProgress), height: 6)
-                                            .animation(reduceMotion ? nil : .spring(response: 0.8), value: viewModel.levelProgress)
-                                    }
-                                }
-                                .frame(height: 6)
-                                .frame(maxWidth: 160)
-
-                                Text("Lv \(viewModel.currentLevel + 1)")
-                                    .font(.caption2.weight(.bold))
-                                    .foregroundStyle(.white.opacity(0.5))
+                                Capsule()
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [EarnedColors.accent, EarnedColors.momentum],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .frame(width: max(6, geo.size.width * viewModel.levelProgress), height: 6)
+                                    .animation(reduceMotion ? nil : .spring(response: 0.8), value: viewModel.levelProgress)
                             }
                         }
-                    }
-                    .opacity(appeared ? 1 : 0)
-                    .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
-                    .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.1), value: appeared)
+                        .frame(height: 6)
+                        .frame(maxWidth: 160)
 
-                    HStack(spacing: 0) {
-                        headerStat(value: "\(viewModel.currentStreak)", label: "Streak", icon: "flame.fill")
-                        headerStatDivider
-                        headerStat(value: "\(viewModel.totalDaysCheckedIn)", label: "Days", icon: "checkmark.circle.fill")
-                        headerStatDivider
-                        headerStat(value: "\(viewModel.totalWinsEarned)", label: "Wins", icon: "star.fill")
+                        Text("Lv \(viewModel.currentLevel + 1)")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.tertiary)
                     }
-                    .padding(.vertical, 12)
-                    .background(.white.opacity(0.08))
-                    .clipShape(.rect(cornerRadius: 14))
-                    .padding(.horizontal, 20)
-                    .opacity(appeared ? 1 : 0)
-                    .offset(y: reduceMotion ? 0 : (appeared ? 0 : 10))
-                    .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.15), value: appeared)
                 }
-                .padding(.top, 24)
-                .padding(.bottom, 24)
             }
+            .opacity(appeared ? 1 : 0)
+            .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.1), value: appeared)
+
+            HStack(spacing: 0) {
+                profileStat(value: "\(viewModel.currentStreak)", label: "Streak", icon: "flame.fill")
+                profileStatDivider
+                profileStat(value: "\(viewModel.totalDaysCheckedIn)", label: "Days", icon: "checkmark.circle.fill")
+                profileStatDivider
+                profileStat(value: "\(viewModel.totalWinsEarned)", label: "Wins", icon: "star.fill")
+            }
+            .padding(.vertical, 12)
+            .opacity(appeared ? 1 : 0)
+            .offset(y: reduceMotion ? 0 : (appeared ? 0 : 10))
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.15), value: appeared)
         }
+        .padding(20)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(.rect(cornerRadius: 20))
     }
 
-    private func headerStat(value: String, label: String, icon: String) -> some View {
+    private func profileStat(value: String, label: String, icon: String) -> some View {
         VStack(spacing: 4) {
             Text(value)
                 .font(.system(.title3, design: .rounded, weight: .bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
                 .monospacedDigit()
 
             HStack(spacing: 3) {
@@ -275,15 +261,15 @@ struct SettingsView: View {
                     .font(.system(size: 9, weight: .heavy))
                     .tracking(0.5)
             }
-            .foregroundStyle(.white.opacity(0.6))
+            .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
     }
 
-    private var headerStatDivider: some View {
+    private var profileStatDivider: some View {
         Rectangle()
-            .fill(Color.white.opacity(0.15))
-            .frame(width: 0.5, height: 30)
+            .fill(Color(.separator))
+            .frame(width: 0.5, height: 28)
     }
 
     // MARK: - Milestones Preview
@@ -797,12 +783,12 @@ struct SettingsView: View {
                 HStack(spacing: 14) {
                     ZStack {
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(EarnedColors.momentum.opacity(0.15))
+                            .fill(EarnedColors.earned.opacity(0.15))
                             .frame(width: 32, height: 32)
 
                         Image(systemName: "person.crop.circle.badge.checkmark")
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(EarnedColors.momentum)
+                            .foregroundStyle(EarnedColors.earned)
                     }
 
                     VStack(alignment: .leading, spacing: 2) {
@@ -856,37 +842,69 @@ struct SettingsView: View {
 
                         Spacer()
 
-                        Image(systemName: "chevron.right")
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(.tertiary)
+                        if gameCenter.isAuthenticating {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Image(systemName: "chevron.right")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(.tertiary)
+                        }
                     }
                 }
+                .disabled(gameCenter.isAuthenticating)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
 
-                Divider().padding(.leading, 62)
+                if let error = gameCenter.authError {
+                    Divider().padding(.leading, 62)
 
-                HStack(spacing: 14) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(EarnedColors.earned.opacity(0.15))
-                            .frame(width: 32, height: 32)
+                    HStack(spacing: 14) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.red.opacity(0.1))
+                                .frame(width: 32, height: 32)
 
-                        Image(systemName: "eye.slash.fill")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(EarnedColors.earned)
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.red)
+                        }
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Sign-In Issue")
+                                .font(.subheadline.weight(.medium))
+                            Text(error)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                } else {
+                    Divider().padding(.leading, 62)
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Privacy-First")
-                            .font(.subheadline.weight(.medium))
-                        Text("Apple handles identity. You stay anonymous.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    HStack(spacing: 14) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(EarnedColors.earned.opacity(0.15))
+                                .frame(width: 32, height: 32)
+
+                            Image(systemName: "eye.slash.fill")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(EarnedColors.earned)
+                        }
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Privacy-First")
+                                .font(.subheadline.weight(.medium))
+                            Text("Apple handles identity. You stay anonymous.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
             }
         }
     }
