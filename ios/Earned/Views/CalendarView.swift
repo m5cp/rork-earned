@@ -2,7 +2,7 @@ import SwiftUI
 
 struct CalendarView: View {
     let viewModel: EarnedViewModel
-    @Binding var selectedDate: Date?
+    @Binding var selectedDate: IdentifiableDate?
     @State private var displayedMonth: Date = .now
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
@@ -86,7 +86,7 @@ struct CalendarView: View {
         let earnedCount = entry?.earnedCount ?? 0
         let isToday = calendar.isDateInToday(date)
         let isFuture = date > .now && !isToday
-        let isSelected = selectedDate.map { calendar.isDate($0, inSameDayAs: date) } ?? false
+        let isSelected = selectedDate.map { calendar.isDate($0.date, inSameDayAs: date) } ?? false
         let hasActivity = earnedCount > 0
         let isComeback = entry?.isComeback == true
         let isPast = !isFuture && !isToday
@@ -95,7 +95,7 @@ struct CalendarView: View {
 
         return Button {
             guard !isFuture else { return }
-            selectedDate = date
+            selectedDate = IdentifiableDate(date: date)
         } label: {
             ZStack {
                 if isSelected {

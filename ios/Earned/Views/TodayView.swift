@@ -11,6 +11,8 @@ struct TodayView: View {
     @State private var arrowPulse: Bool = false
     @State private var glowPulse: Bool = false
     @State private var showSwipeHint: Bool = false
+    @State private var earnHapticTrigger: Int = 0
+    @State private var skipHapticTrigger: Int = 0
     @AppStorage("hasSeenSwipeHint") private var hasSeenSwipeHint: Bool = false
 
     private var isWide: Bool { horizontalSizeClass == .regular }
@@ -89,7 +91,8 @@ struct TodayView: View {
                 }
             }
         }
-        .sensoryFeedback(.selection, trigger: viewModel.currentCardIndex)
+        .sensoryFeedback(.impact(weight: .heavy, intensity: 0.8), trigger: earnHapticTrigger)
+        .sensoryFeedback(.impact(weight: .light, intensity: 0.4), trigger: skipHapticTrigger)
     }
 
     private var backgroundLayer: some View {
@@ -260,7 +263,6 @@ struct TodayView: View {
             .buttonStyle(.plain)
             .foregroundStyle(.white.opacity(0.8))
             .opacity(dragOffset.width < -20 ? 0.2 : 1)
-            .sensoryFeedback(.impact(weight: .light), trigger: viewModel.currentCardIndex)
 
             Spacer()
 
@@ -296,7 +298,6 @@ struct TodayView: View {
             .buttonStyle(.plain)
             .foregroundStyle(EarnedColors.earned)
             .opacity(dragOffset.width > 20 ? 0.2 : 1)
-            .sensoryFeedback(.impact(weight: .medium), trigger: viewModel.currentCardIndex)
         }
         .opacity(appeared ? 1 : 0)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.35), value: appeared)
@@ -329,8 +330,10 @@ struct TodayView: View {
 
             if direction == .right {
                 viewModel.earnWin(win)
+                earnHapticTrigger += 1
             } else {
                 viewModel.skipWin(win)
+                skipHapticTrigger += 1
             }
 
             cardTransition = true

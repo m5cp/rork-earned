@@ -5,24 +5,32 @@ struct EarnedProgressView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared: Bool = false
-    @State private var selectedDate: Date?
+    @State private var selectedDate: IdentifiableDate?
 
     private var isWide: Bool { horizontalSizeClass == .regular }
+
+    private var hasAnyData: Bool {
+        !viewModel.entries.isEmpty
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
-                    statsCards
-                    WeeklyMomentumCardView(viewModel: viewModel)
-                    calendarSection
-                    weeklyTrendChart
+                if hasAnyData {
+                    VStack(spacing: 24) {
+                        statsCards
+                        WeeklyMomentumCardView(viewModel: viewModel)
+                        calendarSection
+                        weeklyTrendChart
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                    .padding(.bottom, 40)
+                    .frame(maxWidth: isWide ? 720 : .infinity)
+                    .frame(maxWidth: .infinity)
+                } else {
+                    emptyState
                 }
-                .padding(.horizontal)
-                .padding(.top, 8)
-                .padding(.bottom, 40)
-                .frame(maxWidth: isWide ? 720 : .infinity)
-                .frame(maxWidth: .infinity)
             }
             .scrollIndicators(.hidden)
             .navigationTitle("Progress")
@@ -30,10 +38,55 @@ struct EarnedProgressView: View {
                 if reduceMotion { appeared = true }
                 else { withAnimation(.easeOut(duration: 0.5)) { appeared = true } }
             }
-            .sheet(item: $selectedDate) { date in
-                DayDetailView(viewModel: viewModel, date: date)
+            .sheet(item: $selectedDate) { item in
+                DayDetailView(viewModel: viewModel, date: item.date)
             }
         }
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 24) {
+            Spacer().frame(height: 80)
+
+            ZStack {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [EarnedColors.accent.opacity(0.2), EarnedColors.accent.opacity(0.05)],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: 50
+                        )
+                    )
+                    .frame(width: 100, height: 100)
+
+                Image(systemName: "chart.bar.fill")
+                    .font(.system(size: 40, weight: .bold))
+                    .foregroundStyle(EarnedColors.accent.opacity(0.6))
+            }
+            .scaleEffect(appeared ? 1 : 0.7)
+            .opacity(appeared ? 1 : 0)
+            .animation(reduceMotion ? nil : .spring(response: 0.5, dampingFraction: 0.7), value: appeared)
+
+            VStack(spacing: 10) {
+                Text("Your Progress Starts Here")
+                    .font(.title2.weight(.bold))
+                    .multilineTextAlignment(.center)
+
+                Text("Complete your first check-in to start\ntracking your wins and streaks.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(3)
+            }
+            .opacity(appeared ? 1 : 0)
+            .offset(y: reduceMotion ? 0 : (appeared ? 0 : 10))
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.1), value: appeared)
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 32)
     }
 
     private var statsCards: some View {
@@ -172,7 +225,7 @@ struct EarnedProgressView: View {
         let labelColor: Color = isTodayDate ? EarnedColors.accent : hasEntry ? .primary : Color(.secondaryLabel)
 
         return Button {
-            selectedDate = item.date
+            selectedDate = IdentifiableDate(date: item.date)
         } label: {
             VStack(spacing: 8) {
                 if item.count > 0 {
@@ -206,6 +259,7 @@ struct EarnedProgressView: View {
     }
 }
 
-extension Date: @retroactive Identifiable {
-    public var id: TimeInterval { timeIntervalSince1970 }
+nonisolated struct IdentifiableDate: Identifiable, Sendable {
+    let date: Date
+    var id: TimeInterval { date.timeIntervalSince1970 }
 }

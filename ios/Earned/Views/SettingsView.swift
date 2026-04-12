@@ -4,6 +4,7 @@ import UserNotifications
 struct SettingsView: View {
     let viewModel: EarnedViewModel
     var store: StoreViewModel
+    var gameCenter: GameCenterService
     @State private var showResetAlert: Bool = false
     @State private var showSubscription: Bool = false
     @State private var nudgeEnabled: Bool = false
@@ -23,6 +24,12 @@ struct SettingsView: View {
     @State private var appeared: Bool = false
     @State private var levelBounce: Int = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var appVersion: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+        return "\(version) (\(build))"
+    }
 
     var body: some View {
         NavigationStack {
@@ -44,6 +51,10 @@ struct SettingsView: View {
                             dailyNudgeContent
                             Divider().padding(.leading, 16)
                             weeklyMomentumContent
+                        }
+
+                        settingsGroup(title: "Game Center", icon: "gamecontroller.fill", iconColor: EarnedColors.momentum) {
+                            gameCenterContent
                         }
 
                         settingsGroup(title: "Integrations", icon: "link", iconColor: EarnedColors.momentum) {
@@ -68,6 +79,10 @@ struct SettingsView: View {
 
                         settingsGroup(title: "Data", icon: "cylinder.split.1x2.fill", iconColor: EarnedColors.strength) {
                             dataContent
+                        }
+
+                        settingsGroup(title: "Export", icon: "square.and.arrow.up.fill", iconColor: EarnedColors.accent) {
+                            exportContent
                         }
 
                         aboutCard
@@ -742,7 +757,7 @@ struct SettingsView: View {
             .padding(.bottom, 10)
 
             VStack(spacing: 0) {
-                aboutRow(label: "Version", value: "1.0")
+                aboutRow(label: "Version", value: appVersion)
                 Divider().padding(.leading, 16)
                 aboutRow(label: "Level", value: "\(viewModel.currentLevel) — \(viewModel.levelTitle)")
                 Divider().padding(.leading, 16)
@@ -772,6 +787,144 @@ struct SettingsView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
+    }
+
+    // MARK: - Game Center
+
+    private var gameCenterContent: some View {
+        VStack(spacing: 0) {
+            if gameCenter.isAuthenticated {
+                HStack(spacing: 14) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(EarnedColors.momentum.opacity(0.15))
+                            .frame(width: 32, height: 32)
+
+                        Image(systemName: "person.crop.circle.badge.checkmark")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(EarnedColors.momentum)
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(gameCenter.playerDisplayName)
+                            .font(.subheadline.weight(.medium))
+                        Text("Connected to Game Center")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(EarnedColors.earned)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+
+                Divider().padding(.leading, 62)
+
+                Button {
+                    gameCenter.showLeaderboard()
+                } label: {
+                    settingsNavRow(icon: "trophy.fill", iconColor: EarnedColors.streak, title: "Leaderboards")
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            } else {
+                Button {
+                    gameCenter.authenticate()
+                } label: {
+                    HStack(spacing: 14) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(EarnedColors.momentum.opacity(0.15))
+                                .frame(width: 32, height: 32)
+
+                            Image(systemName: "gamecontroller.fill")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(EarnedColors.momentum)
+                        }
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Sign In to Game Center")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(.primary)
+                            Text("Compete on leaderboards anonymously")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+
+                Divider().padding(.leading, 62)
+
+                HStack(spacing: 14) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(EarnedColors.earned.opacity(0.15))
+                            .frame(width: 32, height: 32)
+
+                        Image(systemName: "eye.slash.fill")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(EarnedColors.earned)
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Privacy-First")
+                            .font(.subheadline.weight(.medium))
+                        Text("Apple handles identity. You stay anonymous.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+            }
+        }
+    }
+
+    // MARK: - Export
+
+    @State private var showExportShare: Bool = false
+    @State private var exportPDFData: Data?
+
+    private var exportContent: some View {
+        Button {
+            exportJournalPDF()
+        } label: {
+            settingsNavRow(icon: "doc.richtext", iconColor: EarnedColors.accent, title: "Export Journal as PDF")
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .sheet(isPresented: $showExportShare) {
+            if let data = exportPDFData {
+                ShareSheet(items: [data])
+            }
+        }
+    }
+
+    private func exportJournalPDF() {
+        guard let latestKey = viewModel.entries.keys.sorted().last,
+              let entry = viewModel.entries[latestKey],
+              let date = DailyEntry.date(from: latestKey) else { return }
+
+        let wins = viewModel.earnedWins(for: latestKey)
+        let data = JournalPDFService.generatePDF(
+            date: date,
+            wins: wins,
+            journalNote: entry.journalNote,
+            isComeback: entry.isComeback
+        )
+        exportPDFData = data
+        showExportShare = true
     }
 
     // MARK: - Footer

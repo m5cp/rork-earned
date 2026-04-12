@@ -1,8 +1,10 @@
 import SwiftUI
+import GameKit
 
 struct ContentView: View {
     @State private var viewModel = EarnedViewModel()
     @State private var storeViewModel = StoreViewModel()
+    @State private var gameCenter = GameCenterService.shared
     @State private var selectedTab: Int = 0
     @State private var showSplash: Bool = true
     @State private var showMilestoneCelebration: Bool = false
@@ -81,7 +83,12 @@ struct ContentView: View {
                     }
                 }
 
-                if viewModel.isEndOfWeek && storeViewModel.isPremium {
+                let showReflection = viewModel.isEndOfWeek
+                let isFirstReflection = !UserDefaults.standard.bool(forKey: "hasSeenWeeklyReflectionTeaser")
+                if showReflection && (storeViewModel.isPremium || isFirstReflection) {
+                    if isFirstReflection && !storeViewModel.isPremium {
+                        UserDefaults.standard.set(true, forKey: "hasSeenWeeklyReflectionTeaser")
+                    }
                     Task {
                         try? await Task.sleep(for: .milliseconds(1200))
                         withAnimation(.smooth(duration: 0.3)) {
@@ -90,11 +97,21 @@ struct ContentView: View {
                     }
                 }
 
+                gameCenter.submitScores(
+                    totalWins: viewModel.totalWinsEarned,
+                    longestStreak: viewModel.longestStreak,
+                    weeklyWins: viewModel.weeklyEarnedCount,
+                    level: viewModel.currentLevel
+                )
+
                 triggerReviewPromptIfNeeded()
             }
         }
         .sheet(isPresented: $showPaywallAfterFirstCheckIn) {
             SubscriptionView(store: storeViewModel)
+        }
+        .sheet(isPresented: $gameCenter.showGameCenter) {
+            GameCenterDashboardView(viewState: .leaderboards)
         }
     }
 
@@ -109,7 +126,7 @@ struct ContentView: View {
             }
 
             Tab("Settings", systemImage: "gearshape.fill", value: 2) {
-                SettingsView(viewModel: viewModel, store: storeViewModel)
+                SettingsView(viewModel: viewModel, store: storeViewModel, gameCenter: gameCenter)
             }
         }
         .tint(EarnedColors.accent)

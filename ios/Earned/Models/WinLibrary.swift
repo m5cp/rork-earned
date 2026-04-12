@@ -135,6 +135,41 @@ struct WinLibrary {
         Win(text: "You stayed patient", category: .relationships),
         Win(text: "You showed control", category: .relationships),
         Win(text: "You stayed present through a difficult conversation", category: .relationships),
+        Win(text: "You listened more than you spoke", category: .relationships),
+        Win(text: "You chose understanding over reacting", category: .relationships),
+        Win(text: "You showed empathy when it would have been easier not to", category: .relationships),
+        Win(text: "You set a healthy boundary", category: .relationships),
+        Win(text: "You supported someone without expecting anything back", category: .relationships),
+        Win(text: "You let go of needing to be right", category: .relationships),
+
+        // MARK: - Creativity
+
+        Win(text: "You tried something new", category: .courage),
+        Win(text: "You created something today", category: .progress),
+        Win(text: "You solved a problem in a new way", category: .progress),
+        Win(text: "You took a creative risk", category: .courage),
+
+        // MARK: - Health & Body
+
+        Win(text: "You moved your body today", category: .habits),
+        Win(text: "You chose nourishment over convenience", category: .discipline),
+        Win(text: "You got enough sleep", category: .selfKindness),
+        Win(text: "You took a break when your body needed it", category: .selfKindness),
+        Win(text: "You drank enough water", category: .habits),
+
+        // MARK: - Learning & Growth
+
+        Win(text: "You learned something new", category: .progress),
+        Win(text: "You asked for help when you needed it", category: .courage),
+        Win(text: "You admitted you were wrong", category: .courage),
+        Win(text: "You reflected instead of reacting", category: .resilience),
+        Win(text: "You recognized a pattern and chose differently", category: .progress),
+
+        // MARK: - Financial
+
+        Win(text: "You made a smart financial decision", category: .discipline),
+        Win(text: "You resisted an impulse purchase", category: .discipline),
+        Win(text: "You planned ahead with your money", category: .discipline),
     ]
 
     static func dailySet(for date: Date = .now, count: Int = 5) -> [Win] {

@@ -6,6 +6,7 @@ struct MilestoneCelebrationView: View {
     let onShare: () -> Void
     @State private var appeared: Bool = false
     @State private var ringRotation: Double = 0
+    @State private var confettiParticles: [ConfettiParticle] = []
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -13,6 +14,10 @@ struct MilestoneCelebrationView: View {
             Color.black.opacity(appeared ? 0.7 : 0)
                 .ignoresSafeArea()
                 .onTapGesture { onDismiss() }
+
+            if !reduceMotion {
+                confettiLayer
+            }
 
             VStack(spacing: 0) {
                 Spacer()
@@ -147,9 +152,73 @@ struct MilestoneCelebrationView: View {
                 withAnimation(.linear(duration: 8).repeatForever(autoreverses: false)) {
                     ringRotation = 360
                 }
+                spawnConfetti()
             }
         }
         .sensoryFeedback(.impact(weight: .heavy, intensity: 1.0), trigger: appeared)
         .sensoryFeedback(.success, trigger: ringRotation)
+    }
+
+    private func spawnConfetti() {
+        let colors: [Color] = [milestone.color, EarnedColors.accent, EarnedColors.earned, EarnedColors.streak, EarnedColors.momentum, .white]
+        for i in 0..<40 {
+            let particle = ConfettiParticle(
+                id: i,
+                color: colors[i % colors.count],
+                x: CGFloat.random(in: 0...1),
+                delay: Double.random(in: 0...0.6),
+                speed: Double.random(in: 1.8...3.5),
+                rotation: Double.random(in: -360...360),
+                size: CGFloat.random(in: 4...10)
+            )
+            confettiParticles.append(particle)
+        }
+    }
+
+    private var confettiLayer: some View {
+        GeometryReader { geo in
+            ForEach(confettiParticles) { particle in
+                ConfettiPiece(particle: particle, appeared: appeared, size: geo.size)
+            }
+        }
+        .allowsHitTesting(false)
+    }
+}
+
+struct ConfettiParticle: Identifiable {
+    let id: Int
+    let color: Color
+    let x: CGFloat
+    let delay: Double
+    let speed: Double
+    let rotation: Double
+    let size: CGFloat
+}
+
+struct ConfettiPiece: View {
+    let particle: ConfettiParticle
+    let appeared: Bool
+    let size: CGSize
+    @State private var fallen: Bool = false
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 1.5)
+            .fill(particle.color)
+            .frame(width: particle.size, height: particle.size * 0.6)
+            .rotationEffect(.degrees(fallen ? particle.rotation : 0))
+            .position(
+                x: size.width * particle.x,
+                y: fallen ? size.height + 40 : -20
+            )
+            .opacity(fallen ? 0 : 1)
+            .onAppear {
+                guard appeared else { return }
+                withAnimation(
+                    .easeIn(duration: particle.speed)
+                    .delay(particle.delay)
+                ) {
+                    fallen = true
+                }
+            }
     }
 }

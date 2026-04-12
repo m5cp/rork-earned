@@ -4,6 +4,9 @@ struct DayCompleteView: View {
     let viewModel: EarnedViewModel
     @State private var appeared: Bool = false
     @State private var glowPulse: Bool = false
+    @State private var journalText: String = ""
+    @State private var showJournalField: Bool = false
+    @FocusState private var journalFocused: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var earnedCount: Int { viewModel.todayEarnedCount }
@@ -54,6 +57,10 @@ struct DayCompleteView: View {
                             .padding(.horizontal, 24)
                             .padding(.bottom, 24)
                     }
+
+                    journalSection
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
 
                     if let next = viewModel.nextMilestones.first {
                         nextMilestoneCard(next)
@@ -138,6 +145,7 @@ struct DayCompleteView: View {
                     Text("\(earnedCount) wins earned today")
                         .font(.subheadline.weight(.bold))
                         .foregroundStyle(EarnedColors.earnedBright)
+                        .contentTransition(.numericText())
                 }
             }
             .opacity(appeared ? 1 : 0)
@@ -349,6 +357,94 @@ struct DayCompleteView: View {
         .opacity(appeared ? 1 : 0)
         .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
         .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.35), value: appeared)
+    }
+
+    private var journalSection: some View {
+        VStack(spacing: 12) {
+            if !showJournalField {
+                Button {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        showJournalField = true
+                    }
+                    Task {
+                        try? await Task.sleep(for: .milliseconds(300))
+                        journalFocused = true
+                    }
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "square.and.pencil")
+                            .font(.body.weight(.semibold))
+                        Text("Add a Journal Note")
+                            .font(.subheadline.weight(.bold))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.white.opacity(0.4))
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity)
+                    .background(.white.opacity(0.08))
+                    .foregroundStyle(.white.opacity(0.8))
+                    .clipShape(.rect(cornerRadius: 16))
+                }
+            } else {
+                VStack(spacing: 10) {
+                    TextEditor(text: $journalText)
+                        .scrollContentBackground(.hidden)
+                        .font(.body)
+                        .foregroundStyle(.white)
+                        .frame(height: 100)
+                        .padding(12)
+                        .background(.white.opacity(0.08))
+                        .clipShape(.rect(cornerRadius: 14))
+                        .focused($journalFocused)
+                        .overlay(alignment: .topLeading) {
+                            if journalText.isEmpty {
+                                Text("How are you feeling? What stood out today?")
+                                    .font(.body)
+                                    .foregroundStyle(.white.opacity(0.25))
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 20)
+                                    .allowsHitTesting(false)
+                            }
+                        }
+
+                    HStack(spacing: 10) {
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                showJournalField = false
+                                journalText = ""
+                            }
+                        } label: {
+                            Text("Cancel")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.white.opacity(0.5))
+                        }
+
+                        Spacer()
+
+                        Button {
+                            viewModel.saveJournalNote(for: viewModel.todayKey, note: journalText)
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                showJournalField = false
+                            }
+                        } label: {
+                            Text("Save")
+                                .font(.subheadline.weight(.bold))
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 8)
+                                .background(journalText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .white.opacity(0.15) : .white)
+                                .foregroundStyle(journalText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .white.opacity(0.3) : EarnedColors.deepNavy)
+                                .clipShape(.rect(cornerRadius: 10))
+                        }
+                        .disabled(journalText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                }
+            }
+        }
+        .opacity(appeared ? 1 : 0)
+        .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.32), value: appeared)
     }
 
     private var actionButtons: some View {

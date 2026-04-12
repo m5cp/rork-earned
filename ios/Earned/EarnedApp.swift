@@ -1,6 +1,7 @@
 import SwiftUI
 import AppIntents
 import RevenueCat
+import GameKit
 
 @main
 struct EarnedApp: App {
