@@ -11,12 +11,20 @@ struct ContentView: View {
     @State private var showPaywallAfterFirstCheckIn: Bool = false
     @AppStorage("appTheme") private var appTheme: AppTheme = .system
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
+    @AppStorage("hasSeenWelcome") private var hasSeenWelcome: Bool = false
     @AppStorage("hasSeenFirstCheckInPaywall") private var hasSeenFirstCheckInPaywall: Bool = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
-            if !hasCompletedOnboarding && showSplash == false {
+            if !hasSeenWelcome && !hasCompletedOnboarding && showSplash == false {
+                WelcomeView {
+                    withAnimation(.smooth(duration: 0.5)) {
+                        hasSeenWelcome = true
+                    }
+                }
+                .transition(.opacity)
+            } else if !hasCompletedOnboarding && showSplash == false {
                 OnboardingView {
                     withAnimation(.smooth(duration: 0.5)) {
                         hasCompletedOnboarding = true
