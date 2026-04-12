@@ -118,9 +118,7 @@ struct ContentView: View {
         .sheet(isPresented: $showPaywallAfterFirstCheckIn) {
             SubscriptionView(store: storeViewModel)
         }
-        .sheet(isPresented: $gameCenter.showGameCenter) {
-            GameCenterDashboardView(viewState: .leaderboards)
-        }
+
     }
 
     private var mainContent: some View {

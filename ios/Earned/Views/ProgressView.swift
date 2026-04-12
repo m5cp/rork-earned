@@ -22,7 +22,6 @@ struct EarnedProgressView: View {
                         statsCards
                         aiQuickActions
                         moodTrendSection
-                        LeaderboardPreviewView(gameCenter: gameCenter)
                         WeeklyMomentumCardView(viewModel: viewModel)
 
                         NavigationLink {

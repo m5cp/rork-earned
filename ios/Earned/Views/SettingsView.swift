@@ -807,15 +807,6 @@ struct SettingsView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
 
-                Divider().padding(.leading, 62)
-
-                Button {
-                    gameCenter.showLeaderboard()
-                } label: {
-                    settingsNavRow(icon: "trophy.fill", iconColor: EarnedColors.streak, title: "Leaderboards")
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
             } else {
                 Button {
                     gameCenter.authenticate()
@@ -835,7 +826,7 @@ struct SettingsView: View {
                             Text("Sign In to Game Center")
                                 .font(.subheadline.weight(.medium))
                                 .foregroundStyle(.primary)
-                            Text("Compete on leaderboards anonymously")
+                            Text("Track achievements and compete")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
