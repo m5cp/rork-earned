@@ -20,9 +20,9 @@ struct WelcomeView: View {
             nil
         ),
         (
-            "Research shows up to",
-            "80%",
-            "of them were negative."
+            "Most of them?",
+            "Harsh.",
+            "We're our own worst critics."
         ),
         (
             "You told yourself you weren't enough.\nThat you could've done more.\nThat you fell short.",
@@ -61,6 +61,23 @@ struct WelcomeView: View {
                 .allowsHitTesting(false)
 
             VStack(spacing: 0) {
+                HStack {
+                    Spacer()
+                    if currentStep < steps.count {
+                        Button {
+                            onComplete()
+                        } label: {
+                            Text("Skip")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.white.opacity(0.45))
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                        }
+                    }
+                }
+                .padding(.top, 8)
+                .padding(.trailing, 8)
+
                 Spacer()
 
                 if currentStep < steps.count {
