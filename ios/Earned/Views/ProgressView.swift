@@ -7,6 +7,7 @@ struct EarnedProgressView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared: Bool = false
     @State private var selectedDate: IdentifiableDate?
+    @State private var ringDetailDate: IdentifiableDate?
 
     private var isWide: Bool { horizontalSizeClass == .regular }
 
@@ -19,7 +20,8 @@ struct EarnedProgressView: View {
             ScrollView {
                 if hasAnyData {
                     VStack(spacing: 24) {
-                        statsCards
+                        ringsHero
+                        ringsCalendarSection
                         aiQuickActions
                         moodTrendSection
                         WeeklyMomentumCardView(viewModel: viewModel)
@@ -80,6 +82,9 @@ struct EarnedProgressView: View {
             .sheet(item: $selectedDate) { item in
                 DayDetailView(viewModel: viewModel, date: item.date)
             }
+            .sheet(item: $ringDetailDate) { item in
+                RingDetailView(viewModel: viewModel, date: item.date)
+            }
         }
     }
 
@@ -126,6 +131,127 @@ struct EarnedProgressView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 32)
+    }
+
+    private var ringsHero: some View {
+        let rings = viewModel.todayRings
+        let today = Date.now
+        let dateFormatter: DateFormatter = {
+            let f = DateFormatter()
+            f.dateFormat = "EEEE, MMM d"
+            return f
+        }()
+
+        return Button {
+            ringDetailDate = IdentifiableDate(date: today)
+        } label: {
+            VStack(spacing: 16) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("TODAY")
+                            .font(.caption2.weight(.heavy))
+                            .tracking(1.2)
+                            .foregroundStyle(.secondary)
+                        Text(dateFormatter.string(from: today))
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(.primary)
+                    }
+                    Spacer()
+                    if rings.allClosed {
+                        HStack(spacing: 4) {
+                            Image(systemName: "sparkles")
+                                .font(.caption.weight(.bold))
+                            Text("Perfect day")
+                                .font(.caption.weight(.bold))
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(
+                            LinearGradient(
+                                colors: [Color(red: 1.0, green: 0.3, blue: 0.25), Color(red: 0.5, green: 0.32, blue: 1.0)],
+                                startPoint: .leading, endPoint: .trailing
+                            )
+                        )
+                        .clipShape(Capsule())
+                    } else {
+                        Text("\(rings.closedCount)/3")
+                            .font(.system(.subheadline, design: .rounded, weight: .heavy))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                HStack(spacing: 20) {
+                    ReflectionRingsView(rings: rings, lineWidth: 16, spacing: 5)
+                        .frame(width: 140, height: 140)
+
+                    VStack(spacing: 10) {
+                        ringLegend(.checkIn, progress: rings.checkIn)
+                        ringLegend(.reflect, progress: rings.reflect)
+                        ringLegend(.mood, progress: rings.mood)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+
+                HStack(spacing: 4) {
+                    Text("Tap for details")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                    Image(systemName: "chevron.right")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(.tertiary)
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            .padding(18)
+            .background(Color(.secondarySystemBackground))
+            .clipShape(.rect(cornerRadius: 22))
+        }
+        .buttonStyle(.plain)
+        .opacity(appeared ? 1 : 0)
+        .offset(y: reduceMotion ? 0 : (appeared ? 0 : 10))
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.4), value: appeared)
+        .sensoryFeedback(.success, trigger: rings.allClosed)
+    }
+
+    private func ringLegend(_ kind: RingKind, progress: Double) -> some View {
+        let percent = Int(round(progress * 100))
+        return HStack(spacing: 8) {
+            Circle()
+                .fill(kind.gradient)
+                .frame(width: 10, height: 10)
+            Text(kind.title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.primary)
+            Spacer(minLength: 4)
+            Text("\(percent)%")
+                .font(.system(.caption, design: .rounded, weight: .bold))
+                .foregroundStyle(progress >= 1.0 ? kind.solidColor : .secondary)
+                .monospacedDigit()
+        }
+    }
+
+    private var ringsCalendarSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Image(systemName: "circle.circle.fill")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(EarnedColors.streak)
+
+                Text("Rings")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.primary)
+            }
+            .padding(.horizontal, 4)
+
+            RingsCalendarView(viewModel: viewModel, selectedDate: $ringDetailDate)
+                .padding(16)
+                .background(Color(.secondarySystemBackground))
+                .clipShape(.rect(cornerRadius: 20))
+        }
+        .opacity(appeared ? 1 : 0)
+        .offset(y: reduceMotion ? 0 : (appeared ? 0 : 10))
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.1), value: appeared)
     }
 
     private var statsCards: some View {

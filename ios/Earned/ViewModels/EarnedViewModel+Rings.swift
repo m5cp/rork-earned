@@ -1,0 +1,47 @@
+import Foundation
+
+extension EarnedViewModel {
+    func rings(for date: Date) -> ReflectionRings {
+        let key = DailyEntry.dateKey(for: date)
+        let isToday = Calendar.current.isDateInToday(date)
+        let entry = entries[key]
+
+        let checkInProgress: Double = {
+            guard let entry else { return isToday ? min(progress, 1.0) : 0 }
+            let responded = entry.earnedWinIDs.count + entry.skippedWinIDs.count
+            let comebackCounted = entry.earnedWinIDs.contains(Win.comebackID) ? 1 : 0
+            let adjusted = max(0, responded - comebackCounted)
+            if adjusted >= 5 { return 1.0 }
+            if isToday && !checkInComplete {
+                let fromProgress = min(progress, 1.0)
+                return max(Double(adjusted) / 5.0, fromProgress)
+            }
+            return min(Double(adjusted) / 5.0, 1.0)
+        }()
+
+        let reflectProgress: Double = {
+            guard let entry else { return 0 }
+            var value = 0.0
+            if entry.sayItOutLoudCompleted { value += 0.5 }
+            let hasJournal = (entry.journalNote?.isEmpty == false) || (entry.aiJournalEntry?.isEmpty == false)
+            if hasJournal { value += 0.5 }
+            if value == 0 && entry.weeklyReflection?.isEmpty == false { value = 1.0 }
+            return min(value, 1.0)
+        }()
+
+        let moodProgress: Double = {
+            guard let entry else { return 0 }
+            return entry.mood != nil ? 1.0 : 0.0
+        }()
+
+        return ReflectionRings(
+            checkIn: checkInProgress,
+            reflect: reflectProgress,
+            mood: moodProgress
+        )
+    }
+
+    var todayRings: ReflectionRings {
+        rings(for: .now)
+    }
+}
