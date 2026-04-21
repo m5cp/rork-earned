@@ -10,6 +10,7 @@ struct AIJournalView: View {
 
     private var entry: DailyEntry? { viewModel.entries[dateKey] }
     private var hasJournal: Bool { entry?.aiJournalEntry != nil }
+    private var hasAnyWins: Bool { !viewModel.earnedWins(for: dateKey).isEmpty }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -28,6 +29,11 @@ struct AIJournalView: View {
                     .font(.caption)
                     .foregroundStyle(.red.opacity(0.8))
                     .padding(.horizontal, 4)
+            }
+        }
+        .onAppear {
+            if !hasJournal && hasAnyWins && !isGenerating {
+                generateJournal()
             }
         }
     }
