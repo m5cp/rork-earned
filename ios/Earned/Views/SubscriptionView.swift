@@ -315,12 +315,14 @@ struct SubscriptionView: View {
     }
 
     private func sortedPackages(_ packages: [Package]) -> [Package] {
-        let order: [String] = ["$monthly", "$annual", "$lifetime"]
-        return packages.sorted { a, b in
-            let ai = order.firstIndex(of: a.identifier) ?? 99
-            let bi = order.firstIndex(of: b.identifier) ?? 99
-            return ai < bi
-        }
+        let order: [String] = ["$monthly", "$annual"]
+        return packages
+            .filter { $0.identifier != "$lifetime" }
+            .sorted { a, b in
+                let ai = order.firstIndex(of: a.identifier) ?? 99
+                let bi = order.firstIndex(of: b.identifier) ?? 99
+                return ai < bi
+            }
     }
 }
 
@@ -392,11 +394,9 @@ struct PackageCard: View {
             return "Billed monthly"
         case "$annual":
             if let perWeek = package.storeProduct.localizedPricePerWeek {
-                return "Save ~58% · \(perWeek)/week"
+                return "Best value · \(perWeek)/week"
             }
-            return "Save ~58% vs monthly"
-        case "$lifetime":
-            return "One-time purchase"
+            return "Best value"
         default:
             return ""
         }

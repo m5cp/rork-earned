@@ -506,6 +506,17 @@ class EarnedViewModel {
         saveEntries()
     }
 
+    func incrementReflectionCount(for dateKey: String) {
+        var entry = entries[dateKey] ?? DailyEntry(date: dateKey, earnedWinIDs: [], skippedWinIDs: [])
+        entry.aiReflectionCount += 1
+        entries[dateKey] = entry
+        saveEntries()
+    }
+
+    func reflectionCount(for dateKey: String) -> Int {
+        entries[dateKey]?.aiReflectionCount ?? 0
+    }
+
     var entriesWithJournals: [(key: String, entry: DailyEntry)] {
         entries.filter { $0.value.aiJournalEntry != nil || $0.value.journalNote != nil }
             .sorted { $0.key > $1.key }

@@ -194,7 +194,7 @@ struct ContentView: View {
                 })
                     .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .trailing)))
             } else if viewModel.checkInComplete && viewModel.summaryDismissed {
-                DayCompleteView(viewModel: viewModel)
+                DayCompleteView(viewModel: viewModel, store: storeViewModel)
                     .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.98)))
             } else {
                 TodayView(viewModel: viewModel)

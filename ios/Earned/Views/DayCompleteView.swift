@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DayCompleteView: View {
     let viewModel: EarnedViewModel
+    var store: StoreViewModel? = nil
     @State private var appeared: Bool = false
     @State private var glowPulse: Bool = false
     @State private var journalText: String = ""
@@ -597,7 +598,7 @@ struct DayCompleteView: View {
     }
 
     private var aiJournalSection: some View {
-        AIJournalView(viewModel: viewModel, dateKey: viewModel.todayKey)
+        AIJournalView(viewModel: viewModel, store: store, dateKey: viewModel.todayKey)
             .opacity(appeared ? 1 : 0)
             .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
             .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.3), value: appeared)

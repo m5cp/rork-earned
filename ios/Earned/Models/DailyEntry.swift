@@ -12,12 +12,13 @@ nonisolated struct DailyEntry: Codable, Sendable, Identifiable {
     var mood: Mood?
     var aiJournalEntry: String?
     var aiJournalGeneratedAt: Date?
+    var aiReflectionCount: Int = 0
 
     var id: String { date }
 
     var earnedCount: Int { earnedWinIDs.count }
 
-    init(date: String, earnedWinIDs: [String], skippedWinIDs: [String], sayItOutLoudStatement: String? = nil, sayItOutLoudCompleted: Bool = false, isComeback: Bool = false, weeklyReflection: String? = nil, mood: Mood? = nil, aiJournalEntry: String? = nil, aiJournalGeneratedAt: Date? = nil) {
+    init(date: String, earnedWinIDs: [String], skippedWinIDs: [String], sayItOutLoudStatement: String? = nil, sayItOutLoudCompleted: Bool = false, isComeback: Bool = false, weeklyReflection: String? = nil, mood: Mood? = nil, aiJournalEntry: String? = nil, aiJournalGeneratedAt: Date? = nil, aiReflectionCount: Int = 0) {
         self.date = date
         self.earnedWinIDs = earnedWinIDs
         self.skippedWinIDs = skippedWinIDs
@@ -28,6 +29,7 @@ nonisolated struct DailyEntry: Codable, Sendable, Identifiable {
         self.mood = mood
         self.aiJournalEntry = aiJournalEntry
         self.aiJournalGeneratedAt = aiJournalGeneratedAt
+        self.aiReflectionCount = aiReflectionCount
     }
 
     static func dateKey(for date: Date = .now) -> String {

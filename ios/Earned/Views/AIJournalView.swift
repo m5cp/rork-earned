@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AIJournalView: View {
     let viewModel: EarnedViewModel
+    var store: StoreViewModel?
     let dateKey: String
     @State private var isGenerating: Bool = false
     @State private var generationError: String?
@@ -9,6 +10,8 @@ struct AIJournalView: View {
     @State private var draftText: String = ""
     @State private var isEditing: Bool = false
     @State private var justSaved: Bool = false
+    @State private var showLimitReached: Bool = false
+    @State private var showPaywall: Bool = false
     @FocusState private var editorFocused: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -16,6 +19,10 @@ struct AIJournalView: View {
     private var hasSavedJournal: Bool {
         entry?.aiJournalEntry?.isEmpty == false
     }
+    private var isPremium: Bool { store?.isPremium == true }
+    private var dailyLimit: Int { isPremium ? 2 : 1 }
+    private var reflectionsUsed: Int { viewModel.reflectionCount(for: dateKey) }
+    private var canGenerateMore: Bool { reflectionsUsed < dailyLimit }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -23,6 +30,8 @@ struct AIJournalView: View {
 
             if isGenerating {
                 generatingState
+            } else if showLimitReached {
+                limitReachedState
             } else if !draftText.isEmpty || hasSavedJournal {
                 journalEditor
             } else if let error = generationError {
@@ -68,10 +77,10 @@ struct AIJournalView: View {
                     .foregroundStyle(.white.opacity(0.5))
                 }
                 .confirmationDialog("Regenerate journal entry?", isPresented: $showRegenerateConfirm) {
-                    Button("Regenerate") { generateJournal() }
+                    Button("Regenerate") { attemptGenerate() }
                     Button("Cancel", role: .cancel) {}
                 } message: {
-                    Text("This will replace the current text.")
+                    Text(reflectionsUsed >= dailyLimit ? "You've used today's reflections." : "This will replace the current text and use \(reflectionsUsed + 1) of \(dailyLimit) reflections today.")
                 }
             }
         }
@@ -201,7 +210,7 @@ struct AIJournalView: View {
 
     private var generatePrompt: some View {
         Button {
-            generateJournal()
+            attemptGenerate()
         } label: {
             HStack(spacing: 12) {
                 ZStack {
@@ -233,6 +242,95 @@ struct AIJournalView: View {
             .padding(14)
             .background(.white.opacity(0.08))
             .clipShape(.rect(cornerRadius: 16))
+        }
+    }
+
+    private var limitReachedState: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(EarnedColors.momentum.opacity(0.2))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "moon.stars.fill")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(EarnedColors.momentumBright)
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(isPremium ? "You've used today's reflections" : "Daily reflection used")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(.white)
+                    Text(limitSubtitle)
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.6))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+
+            if !isPremium {
+                Button {
+                    showPaywall = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "sparkles")
+                            .font(.caption.weight(.heavy))
+                        Text("Upgrade to Premium")
+                            .font(.subheadline.weight(.bold))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(.white)
+                    .foregroundStyle(EarnedColors.deepNavy)
+                    .clipShape(.rect(cornerRadius: 12))
+                }
+            }
+
+            Button {
+                withAnimation(.smooth(duration: 0.25)) { showLimitReached = false }
+            } label: {
+                Text("Close")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.5))
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.white.opacity(0.06))
+        .clipShape(.rect(cornerRadius: 16))
+        .sheet(isPresented: $showPaywall) {
+            if let store {
+                SubscriptionView(store: store)
+            }
+        }
+    }
+
+    private var limitSubtitle: String {
+        if isPremium {
+            return "Premium includes 2 reflections per day. Your next one unlocks \(resetTimeString)."
+        } else {
+            return "Free plan includes 1 reflection per day. Upgrade for 2 daily reflections, or come back \(resetTimeString)."
+        }
+    }
+
+    private var resetTimeString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        let calendar = Calendar.current
+        if let tomorrow = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: .now)) {
+            return "at \(formatter.string(from: tomorrow))"
+        }
+        return "tomorrow"
+    }
+
+    private func attemptGenerate() {
+        if canGenerateMore {
+            generateJournal()
+        } else {
+            withAnimation(.smooth(duration: 0.3)) {
+                showLimitReached = true
+            }
         }
     }
 
@@ -268,6 +366,7 @@ struct AIJournalView: View {
                     userNote: entry.journalNote
                 )
                 draftText = journalText
+                viewModel.incrementReflectionCount(for: dateKey)
                 isGenerating = false
             } catch {
                 generationError = error.localizedDescription
