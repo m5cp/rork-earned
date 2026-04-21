@@ -1,29 +1,29 @@
 # Quick Wins: Restore in Settings, annual pre-select + weekly price, MetricKit, share polish, transformation slide, opt-in analytics
 
-Here's what I'll change — nothing working today gets touched.
+All items below are implemented and the app builds cleanly.
 
 ## Paywall polish
-- Annual plan is pre-selected the moment the paywall opens (instead of no selection).
-- Under the annual price, add a small "≈ $X.XX/week" line so the value feels concrete.
-- Add a new **"What changes after 7 days"** transformation slide that appears right before the paywall — a clean visual with three short before/after lines (e.g. "Forgetting wins → Noticing them daily", "Guilty rest days → Proud rest days", "No rhythm → A streak you care about"). Honest, aspirational, no false claims.
+- [x] Annual plan pre-selected the moment the paywall opens.
+- [x] "≈ $X.XX/week" line shown under the annual price.
+- [x] "What changes after 7 days" transformation slide shown before the paywall with three before/after lines.
 
 ## Settings
-- Add a **Restore Purchases** row inside the Subscription section so it's always one tap away (Apple prefers this).
-- Add a **Privacy & Insights** section with a single opt-in toggle: "Help improve Earned — share anonymous usage." Off by default. When on, the app sends anonymous, non-personal events (screens viewed, paywall shown/purchased, check-in completed) to a privacy-first analytics service. No names, no content, no device IDs beyond an anonymous install token. When off, nothing is sent.
-- Update the existing privacy copy from "No analytics or ad networks" to clearly describe the opt-in ("Anonymous usage insights are off by default. You can enable them in Settings.").
+- [x] Restore Purchases row inside the Subscription section (always one tap away).
+- [x] Privacy & Insights section with opt-in toggle, off by default.
+- [x] Privacy copy updated to describe the opt-in clearly.
 
 ## Share card polish
-- When the user taps Share on a card, a pre-filled caption comes along: "Day {streak} earned. ✨ — Earned app"
-- Add a subtle "Earned" wordmark in the bottom corner of exported share cards so it travels with the image.
+- [x] Pre-filled share caption: "Day {streak} earned. ✨ — Earned app".
+- [x] Subtle "MVM EARNED" wordmark in the bottom of exported share cards.
 
 ## Stability
-- Wire in a lightweight crash & hang logger (Apple's built-in MetricKit — no third-party SDK, no extra permissions). Reports are collected silently and saved locally so you can see them after TestFlight runs.
+- [x] MetricKit crash & hang logger wired in at app launch (no third-party SDK, no extra permissions).
 
 ## Dead-code check
-- Verify `StreakShieldService`, `PhotoFilterService`, and `AIAffirmationView` are actually reachable. If any are orphaned, I'll either wire them to an existing surface or remove them (removing reduces App Review risk).
+- [x] `StreakShieldService` reachable (used in DayCompleteView).
+- [x] `PhotoFilterService` reachable (used in ShareCardViewModel).
+- [x] `AIAffirmationView` does not exist in the project — nothing to remove.
 
 ## What stays exactly as it is
 - Today / Swipe flow, Journal, Progress, Reflection Rings, Calendar, onboarding screens, milestones, Game Center, widget, Live Activity, daily nudge, weekly momentum, AI coach, PDF export — untouched.
 - No pricing changes. No screen reorganization. No new permissions.
-
-After I make the changes I'll build the app to confirm everything still compiles, and you'll see the updates live in the preview.
