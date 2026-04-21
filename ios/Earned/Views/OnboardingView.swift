@@ -139,6 +139,7 @@ struct OnboardingView: View {
                     currentPage += 1
                 }
             } else {
+                AnalyticsService.shared.track(AnalyticsEvent.onboardingCompleted)
                 onComplete()
             }
         } label: {
@@ -155,6 +156,7 @@ struct OnboardingView: View {
 
     private var skipButton: some View {
         Button {
+            AnalyticsService.shared.track(AnalyticsEvent.onboardingCompleted, properties: ["skipped": "true"])
             onComplete()
         } label: {
             Text("Skip")

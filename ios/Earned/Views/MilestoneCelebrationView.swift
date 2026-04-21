@@ -9,6 +9,10 @@ struct MilestoneCelebrationView: View {
     @State private var confettiParticles: [ConfettiParticle] = []
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    private var shareText: String {
+        "I just unlocked \(milestone.title) on Earned. \(milestone.description) — try it: https://apps.apple.com"
+    }
+
     var body: some View {
         ZStack {
             Color.black.opacity(appeared ? 0.7 : 0)
@@ -68,9 +72,10 @@ struct MilestoneCelebrationView: View {
                     }
 
                     VStack(spacing: 12) {
-                        Button {
-                            onShare()
-                        } label: {
+                        ShareLink(
+                            item: shareText,
+                            preview: SharePreview(milestone.title)
+                        ) {
                             HStack(spacing: 8) {
                                 Image(systemName: "square.and.arrow.up")
                                     .font(.subheadline.weight(.bold))
@@ -83,6 +88,10 @@ struct MilestoneCelebrationView: View {
                             .foregroundStyle(Color(red: 0.04, green: 0.05, blue: 0.14))
                             .clipShape(.rect(cornerRadius: 14))
                         }
+                        .simultaneousGesture(TapGesture().onEnded {
+                            AnalyticsService.shared.track("milestone_shared", properties: ["id": milestone.id])
+                            onShare()
+                        })
 
                         Button {
                             onDismiss()

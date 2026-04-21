@@ -236,18 +236,21 @@ struct EarnedWidgetEntryView: View {
     var entry: EarnedEntry
 
     var body: some View {
-        switch family {
-        case .systemSmall:
-            EarnedWidgetSmallView(entry: entry)
-        case .systemMedium:
-            EarnedWidgetMediumView(entry: entry)
-        case .accessoryCircular:
-            EarnedWidgetLockScreenView(entry: entry)
-        case .accessoryRectangular:
-            EarnedWidgetRectangularView(entry: entry)
-        default:
-            EarnedWidgetSmallView(entry: entry)
+        Group {
+            switch family {
+            case .systemSmall:
+                EarnedWidgetSmallView(entry: entry)
+            case .systemMedium:
+                EarnedWidgetMediumView(entry: entry)
+            case .accessoryCircular:
+                EarnedWidgetLockScreenView(entry: entry)
+            case .accessoryRectangular:
+                EarnedWidgetRectangularView(entry: entry)
+            default:
+                EarnedWidgetSmallView(entry: entry)
+            }
         }
+        .widgetURL(URL(string: "earned://today"))
     }
 }
 

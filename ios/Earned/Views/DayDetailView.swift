@@ -97,7 +97,8 @@ struct DayDetailView: View {
                     .foregroundStyle(EarnedColors.accent)
                 }
             }
-            .sheet(isPresented: $showShareCard) {
+            .sheet(isPresented: $showShareCard, onDismiss: {}) {
+                let _ = AnalyticsService.shared.track(AnalyticsEvent.shareCardOpened)
                 ShareCardSheet(
                     wins: earnedWins,
                     affirmation: entry?.sayItOutLoudStatement ?? SayItOutLoudLibrary.statement(for: earnedWins),

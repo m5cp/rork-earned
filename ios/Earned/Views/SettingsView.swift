@@ -828,13 +828,20 @@ struct SettingsView: View {
                         .foregroundStyle(.red)
                 }
 
-                Text("Reset All Data")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.red)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Delete All Data")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.red)
+                    Text("Permanently erases history, streaks, and journal")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
 
                 Spacer()
             }
         }
+        .accessibilityLabel("Delete all data")
+        .accessibilityHint("Permanently erases your check-in history and streaks")
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
     }
@@ -1034,6 +1041,7 @@ struct SettingsView: View {
     }
 
     private func exportJournalPDF() {
+        AnalyticsService.shared.track("journal_exported")
         guard let latestKey = viewModel.entries.keys.sorted().last,
               let entry = viewModel.entries[latestKey],
               let date = DailyEntry.date(from: latestKey) else { return }

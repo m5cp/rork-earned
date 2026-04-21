@@ -118,7 +118,13 @@ struct ContentView: View {
         .sheet(isPresented: $showPaywallAfterFirstCheckIn) {
             SubscriptionView(store: storeViewModel)
         }
-
+        .onReceive(NotificationCenter.default.publisher(for: .earnedDeepLink)) { notification in
+            guard let url = notification.object as? URL else { return }
+            if url.host == "today" || url.path.contains("today") {
+                selectedTab = 0
+                AnalyticsService.shared.track("widget_opened")
+            }
+        }
     }
 
     private var mainContent: some View {
@@ -142,6 +148,16 @@ struct ContentView: View {
             }
         }
         .tint(EarnedColors.accent)
+        .onChange(of: selectedTab) { _, newValue in
+            let name: String = switch newValue {
+            case 0: "today"
+            case 1: "journal"
+            case 2: "progress"
+            case 3: "settings"
+            default: "unknown"
+            }
+            AnalyticsService.shared.track("tab_viewed", properties: ["tab": name])
+        }
     }
 
     private var todayFlow: some View {

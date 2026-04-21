@@ -92,7 +92,7 @@ struct SummaryView: View {
                 iconBounce += 1
             }
         }
-        .sheet(isPresented: $showShareSheet) {
+        .sheet(isPresented: $showShareSheet, onDismiss: {}) {
             ShareCardSheet(
                 wins: earnedWins,
                 affirmation: shareHeadline,
@@ -407,6 +407,7 @@ struct SummaryView: View {
 
             if !earnedWins.isEmpty {
                 Button {
+                    AnalyticsService.shared.track(AnalyticsEvent.shareCardOpened)
                     showShareSheet = true
                 } label: {
                     HStack(spacing: 8) {

@@ -3,6 +3,10 @@ import AppIntents
 import RevenueCat
 import GameKit
 
+nonisolated extension Notification.Name {
+    static let earnedDeepLink = Notification.Name("earnedDeepLink")
+}
+
 @main
 struct EarnedApp: App {
     init() {
@@ -25,6 +29,9 @@ struct EarnedApp: App {
                 .onAppear {
                     refreshScheduledNotifications()
                     GameCenterService.shared.authenticate()
+                }
+                .onOpenURL { url in
+                    NotificationCenter.default.post(name: .earnedDeepLink, object: url)
                 }
         }
     }

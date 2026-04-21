@@ -8,6 +8,8 @@ struct SubscriptionView: View {
     @State private var isRestoring: Bool = false
     @State private var showTransformation: Bool = true
     @State private var hasTrackedShown: Bool = false
+    @State private var showSecondChance: Bool = false
+    @AppStorage("hasSeenSecondChancePaywall") private var hasSeenSecondChancePaywall: Bool = false
 
     private let features: [(icon: String, title: String, subtitle: String)] = [
         ("star.fill", "Unlimited Check-ins", "Track your wins every day without limits"),
@@ -43,13 +45,21 @@ struct SubscriptionView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
                         AnalyticsService.shared.track(AnalyticsEvent.paywallDismissed)
-                        dismiss()
+                        if !hasSeenSecondChancePaywall && !showTransformation && !store.isPremium {
+                            hasSeenSecondChancePaywall = true
+                            withAnimation(.smooth(duration: 0.3)) {
+                                showSecondChance = true
+                            }
+                        } else {
+                            dismiss()
+                        }
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title3)
                             .symbolRenderingMode(.hierarchical)
                             .foregroundStyle(.secondary)
                     }
+                    .accessibilityLabel("Close")
                 }
             }
             .alert("Error", isPresented: .init(
@@ -88,6 +98,41 @@ struct SubscriptionView: View {
                 footerSection
             }
         }
+        .overlay {
+            if showSecondChance {
+                SecondChanceOverlay(
+                    annualPrice: annualPerWeekString,
+                    onContinue: {
+                        AnalyticsService.shared.track("paywall_second_chance_continue")
+                        withAnimation(.smooth(duration: 0.25)) {
+                            showSecondChance = false
+                        }
+                        if let current = store.offerings?.current {
+                            let sorted = sortedPackages(current.availablePackages)
+                            selectedPackage = sorted.first(where: { $0.identifier == "$annual" }) ?? sorted.first
+                        }
+                    },
+                    onDecline: {
+                        AnalyticsService.shared.track("paywall_second_chance_declined")
+                        dismiss()
+                    }
+                )
+                .transition(.opacity)
+            }
+        }
+        .onAppear {
+            if !showSecondChance {
+                AnalyticsService.shared.track("paywall_second_chance_shown")
+            }
+        }
+    }
+
+    private var annualPerWeekString: String? {
+        guard let current = store.offerings?.current,
+              let annual = current.availablePackages.first(where: { $0.identifier == "$annual" }) else {
+            return nil
+        }
+        return annual.storeProduct.localizedPricePerWeek
     }
 
     private func preselectAnnual(from packages: [Package]) {
@@ -354,6 +399,81 @@ struct PackageCard: View {
             return "One-time purchase"
         default:
             return ""
+        }
+    }
+}
+
+private struct SecondChanceOverlay: View {
+    let annualPrice: String?
+    let onContinue: () -> Void
+    let onDecline: () -> Void
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.55).ignoresSafeArea()
+                .onTapGesture { onDecline() }
+
+            VStack(spacing: 20) {
+                ZStack {
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [EarnedColors.accent.opacity(0.35), .clear],
+                                center: .center,
+                                startRadius: 10,
+                                endRadius: 60
+                            )
+                        )
+                        .frame(width: 100, height: 100)
+
+                    Image(systemName: "gift.fill")
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundStyle(EarnedColors.primaryGradient)
+                }
+
+                VStack(spacing: 8) {
+                    Text("Wait — one more thing")
+                        .font(.title3.bold())
+                        .multilineTextAlignment(.center)
+
+                    if let price = annualPrice {
+                        Text("Earned Pro for just \(price)/week, billed yearly. Less than a coffee per month.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    } else {
+                        Text("The yearly plan works out to less than a coffee a month — and unlocks everything.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .padding(.horizontal, 8)
+
+                VStack(spacing: 10) {
+                    Button(action: onContinue) {
+                        Text("See the yearly plan")
+                            .font(.subheadline.weight(.bold))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(EarnedColors.accent)
+                            .foregroundStyle(.white)
+                            .clipShape(.rect(cornerRadius: 12))
+                    }
+
+                    Button(action: onDecline) {
+                        Text("No thanks")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                    }
+                }
+            }
+            .padding(24)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(.rect(cornerRadius: 24))
+            .padding(.horizontal, 32)
         }
     }
 }

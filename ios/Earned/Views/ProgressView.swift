@@ -417,6 +417,7 @@ struct EarnedProgressView: View {
         HStack(spacing: 12) {
             NavigationLink {
                 CoachChatView(earnedViewModel: viewModel)
+                    .onAppear { AnalyticsService.shared.track("coach_opened") }
             } label: {
                 HStack(spacing: 10) {
                     ZStack {
