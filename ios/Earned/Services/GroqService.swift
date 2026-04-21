@@ -38,34 +38,39 @@ class GroqService {
         isComeback: Bool,
         userNote: String?
     ) async throws -> String {
-        let winTexts = wins.map { "- \($0.text) (\($0.category.displayName))" }.joined(separator: "\n")
-        let skippedTexts = skippedWins.isEmpty ? "None" : skippedWins.map { "- \($0.text)" }.joined(separator: "\n")
+        let yesTexts = wins.isEmpty ? "None" : wins.map { "- \($0.text)" }.joined(separator: "\n")
+        let noTexts = skippedWins.isEmpty ? "None" : skippedWins.map { "- \($0.text)" }.joined(separator: "\n")
         let moodText = mood.map { "\($0.label) (\($0.emoji))" } ?? "Not specified"
         let noteText = userNote.map { "User's personal note: \"\($0)\"" } ?? ""
-        let comebackText = isComeback ? "This person came back after missing a day — that takes courage." : ""
+        let comebackText = isComeback ? "They came back after missing a day — honor that gently." : ""
 
         let systemPrompt = """
-        You are a warm, insightful personal journal writer. Your job is to take someone's daily wins \
-        and create a beautiful, reflective first-person journal entry as if they wrote it themselves. \
-        Write in first person. Be authentic, not cheesy. Keep it conversational but meaningful. \
-        2-3 short paragraphs max. Don't use bullet points. Don't repeat the wins verbatim — \
-        weave them naturally into a narrative about the day. Reference their mood naturally if provided. \
-        End on a forward-looking or grateful note. Never use hashtags or emojis in the entry.
+        You are a warm, encouraging, judgment-free personal journal writer. \
+        The user just answered yes/no reflection prompts about their day. \
+        Write a short first-person journal entry (2–3 short paragraphs) as if they wrote it themselves. \
+        Tone: happy, kind, encouraging, gentle. NEVER judge, shame, guilt, or criticize. \
+        Celebrate the YES answers warmly. Frame the NO answers as gentle self-awareness or soft \
+        observations about what tomorrow could hold — never as failures or shortcomings. \
+        Do not list the prompts verbatim — weave them naturally into a soft, reflective narrative. \
+        If everything is NO, be extra kind and remind them that simply showing up to reflect is \
+        meaningful and enough. Never use hashtags, emojis, or bullet points.
         """
 
         let userPrompt = """
-        Today's wins earned:
-        \(winTexts)
+        Today's reflection answers:
 
-        Wins skipped today:
-        \(skippedTexts)
+        Said YES to:
+        \(yesTexts)
+
+        Said NO (or not today) to:
+        \(noTexts)
 
         Mood: \(moodText)
         Current streak: \(streak) days
         \(comebackText)
         \(noteText)
 
-        Write a personal, reflective journal entry for today.
+        Write a warm, encouraging first-person journal entry for today. Happy tone, no judgment.
         """
 
         return try await chatCompletion(system: systemPrompt, user: userPrompt)

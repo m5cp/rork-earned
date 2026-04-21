@@ -263,7 +263,7 @@ struct TodayView: View {
                     )
                     .animation(reduceMotion ? .none : .spring(response: 0.35, dampingFraction: 0.8), value: dragOffset)
                     .accessibilityLabel("\(win.category.displayName): \(win.text)")
-                    .accessibilityHint("Swipe right to earn, swipe left to skip")
+                    .accessibilityHint("Swipe right for yes, swipe left for no")
                     .accessibilityAddTraits(.isButton)
             }
         }
@@ -286,7 +286,7 @@ struct TodayView: View {
                             .offset(x: arrowPulse ? -3 : 0)
                             .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: arrowPulse)
                     }
-                    Text("SKIP")
+                    Text("NO")
                         .font(.caption2.weight(.black))
                         .tracking(2)
                 }
@@ -321,7 +321,7 @@ struct TodayView: View {
                             .offset(x: arrowPulse ? 3 : 0)
                             .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: arrowPulse)
                     }
-                    Text("LOG IT")
+                    Text("YES")
                         .font(.caption2.weight(.black))
                         .tracking(2)
                 }

@@ -21,12 +21,17 @@ extension EarnedViewModel {
 
         let reflectProgress: Double = {
             guard let entry else { return 0 }
-            var value = 0.0
-            if entry.sayItOutLoudCompleted { value += 0.5 }
-            let hasJournal = (entry.journalNote?.isEmpty == false) || (entry.aiJournalEntry?.isEmpty == false)
-            if hasJournal { value += 0.5 }
-            if value == 0 && entry.weeklyReflection?.isEmpty == false { value = 1.0 }
-            return min(value, 1.0)
+            let responded = entry.earnedWinIDs.count + entry.skippedWinIDs.count
+            let comebackCounted = entry.earnedWinIDs.contains(Win.comebackID) ? 1 : 0
+            let adjusted = max(0, responded - comebackCounted)
+            if adjusted >= 5 { return 1.0 }
+            if (entry.journalNote?.isEmpty == false) || (entry.aiJournalEntry?.isEmpty == false) { return 1.0 }
+            if entry.sayItOutLoudCompleted { return 1.0 }
+            if entry.weeklyReflection?.isEmpty == false { return 1.0 }
+            if isToday && adjusted > 0 {
+                return Double(adjusted) / 5.0
+            }
+            return 0
         }()
 
         let moodProgress: Double = {

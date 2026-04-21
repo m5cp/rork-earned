@@ -84,7 +84,8 @@ struct SwipeCardView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.body.weight(.bold))
-                    Text("EARNED")
+
+                    Text("YES")
                         .font(.caption.weight(.black))
                         .tracking(2)
                 }
@@ -92,9 +93,9 @@ struct SwipeCardView: View {
                 .opacity(earnedOpacity)
 
                 HStack(spacing: 8) {
-                    Image(systemName: "xmark")
+                    Image(systemName: "circle")
                         .font(.body.weight(.bold))
-                    Text("SKIP")
+                    Text("NOT TODAY")
                         .font(.caption.weight(.black))
                         .tracking(2)
                 }
