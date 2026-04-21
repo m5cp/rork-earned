@@ -23,6 +23,9 @@ struct SettingsView: View {
     @State private var calendarAccessDenied: Bool = false
     @State private var appeared: Bool = false
     @State private var levelBounce: Int = 0
+    @State private var analytics = AnalyticsService.shared
+    @State private var isRestoring: Bool = false
+    @State private var restoreMessage: String?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var appVersion: String {
@@ -69,6 +72,10 @@ struct SettingsView: View {
 
                         settingsGroup(title: "Privacy", icon: "lock.shield.fill", iconColor: EarnedColors.earned) {
                             privacyContent
+                        }
+
+                        settingsGroup(title: "Privacy & Insights", icon: "chart.bar.doc.horizontal", iconColor: EarnedColors.momentum) {
+                            insightsContent
                         }
 
                         settingsGroup(title: "Support", icon: "lifepreserver.fill", iconColor: EarnedColors.accent) {
@@ -137,6 +144,14 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showSubscription) {
                 SubscriptionView(store: store)
+            }
+            .alert("Restore Purchases", isPresented: .init(
+                get: { restoreMessage != nil },
+                set: { if !$0 { restoreMessage = nil } }
+            )) {
+                Button("OK") { restoreMessage = nil }
+            } message: {
+                Text(restoreMessage ?? "")
             }
             .alert("Notifications Disabled", isPresented: $notificationDenied) {
                 Button("Open Settings") {
@@ -413,47 +428,51 @@ struct SettingsView: View {
                 .background(Color(.secondarySystemGroupedBackground))
                 .clipShape(.rect(cornerRadius: 18))
             } else {
-                Button {
-                    showSubscription = true
-                } label: {
-                    HStack(spacing: 14) {
-                        ZStack {
-                            Circle()
-                                .fill(
-                                    RadialGradient(
-                                        colors: [EarnedColors.accent.opacity(0.3), EarnedColors.momentum.opacity(0.15)],
-                                        center: .center,
-                                        startRadius: 0,
-                                        endRadius: 22
+                VStack(spacing: 10) {
+                    Button {
+                        showSubscription = true
+                    } label: {
+                        HStack(spacing: 14) {
+                            ZStack {
+                                Circle()
+                                    .fill(
+                                        RadialGradient(
+                                            colors: [EarnedColors.accent.opacity(0.3), EarnedColors.momentum.opacity(0.15)],
+                                            center: .center,
+                                            startRadius: 0,
+                                            endRadius: 22
+                                        )
                                     )
-                                )
-                                .frame(width: 44, height: 44)
+                                    .frame(width: 44, height: 44)
 
-                            Image(systemName: "trophy.fill")
-                                .font(.system(size: 18, weight: .bold))
-                                .foregroundStyle(EarnedColors.accent)
+                                Image(systemName: "trophy.fill")
+                                    .font(.system(size: 18, weight: .bold))
+                                    .foregroundStyle(EarnedColors.accent)
+                            }
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Upgrade to Pro")
+                                    .font(.subheadline.weight(.bold))
+                                    .foregroundStyle(.primary)
+                                Text("Unlock the full experience")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            Spacer()
+
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(.tertiary)
                         }
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Upgrade to Pro")
-                                .font(.subheadline.weight(.bold))
-                                .foregroundStyle(.primary)
-                            Text("Unlock the full experience")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Spacer()
-
-                        Image(systemName: "chevron.right")
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(.tertiary)
+                        .padding(16)
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .clipShape(.rect(cornerRadius: 18))
                     }
-                    .padding(16)
-                    .background(Color(.secondarySystemGroupedBackground))
-                    .clipShape(.rect(cornerRadius: 18))
+                    .buttonStyle(.plain)
+
+                    restorePurchasesRow
                 }
-                .buttonStyle(.plain)
             }
         }
         .opacity(appeared ? 1 : 0)
@@ -618,15 +637,109 @@ struct SettingsView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("No Tracking")
+                    Text("Anonymous Insights Off by Default")
                         .font(.subheadline.weight(.medium))
-                    Text("No analytics or ad networks")
+                    Text("Opt in below — no names, no content, no ads")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
+        }
+    }
+
+    // MARK: - Insights Opt-In
+
+    private var insightsContent: some View {
+        VStack(spacing: 0) {
+            Toggle(isOn: Binding(
+                get: { analytics.isOptedIn },
+                set: { analytics.isOptedIn = $0 }
+            )) {
+                settingsRow(
+                    icon: "chart.line.uptrend.xyaxis",
+                    iconColor: EarnedColors.momentum,
+                    title: "Share Anonymous Usage",
+                    subtitle: "Help improve Earned — no names or content"
+                )
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+
+            Divider().padding(.leading, 62)
+
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(EarnedColors.accent.opacity(0.15))
+                        .frame(width: 32, height: 32)
+
+                    Image(systemName: "info.circle.fill")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(EarnedColors.accent)
+                }
+
+                Text("Off by default. Only anonymous counters like screens opened and paywall outcomes. Turn off anytime.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+        }
+    }
+
+    private var restorePurchasesRow: some View {
+        Button {
+            restorePurchases()
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(EarnedColors.momentum.opacity(0.15))
+                        .frame(width: 44, height: 44)
+
+                    if isRestoring {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(EarnedColors.momentum)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Restore Purchases")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(.primary)
+                    Text("Already subscribed? Tap to restore")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+            }
+            .padding(16)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(.rect(cornerRadius: 18))
+        }
+        .buttonStyle(.plain)
+        .disabled(isRestoring)
+    }
+
+    private func restorePurchases() {
+        isRestoring = true
+        Task {
+            await store.restore()
+            isRestoring = false
+            if store.isPremium {
+                restoreMessage = "Your subscription has been restored."
+                AnalyticsService.shared.track(AnalyticsEvent.paywallRestored)
+            } else {
+                restoreMessage = "No previous purchases were found for this Apple ID."
+            }
         }
     }
 

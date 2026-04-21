@@ -13,6 +13,10 @@ struct EarnedApp: App {
         Purchases.configure(withAPIKey: Config.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY)
         #endif
         EarnedShortcuts.updateAppShortcutParameters()
+        MainActor.assumeIsolated {
+            MetricKitService.shared.start()
+            AnalyticsService.shared.track(AnalyticsEvent.appOpen)
+        }
     }
 
     var body: some Scene {

@@ -6,6 +6,8 @@ struct SubscriptionView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedPackage: Package?
     @State private var isRestoring: Bool = false
+    @State private var showTransformation: Bool = true
+    @State private var hasTrackedShown: Bool = false
 
     private let features: [(icon: String, title: String, subtitle: String)] = [
         ("star.fill", "Unlimited Check-ins", "Track your wins every day without limits"),
@@ -18,19 +20,31 @@ struct SubscriptionView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    headerSection
-                    featuresSection
-                    packagesSection
-                    footerSection
+            Group {
+                if showTransformation {
+                    TransformationIntroView(onContinue: {
+                        withAnimation(.smooth(duration: 0.35)) {
+                            showTransformation = false
+                        }
+                        if !hasTrackedShown {
+                            hasTrackedShown = true
+                            AnalyticsService.shared.track(AnalyticsEvent.paywallShown)
+                        }
+                    })
+                    .transition(.opacity)
+                } else {
+                    paywallScroll
+                        .transition(.opacity)
                 }
             }
             .background(Color(.systemGroupedBackground))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button { dismiss() } label: {
+                    Button {
+                        AnalyticsService.shared.track(AnalyticsEvent.paywallDismissed)
+                        dismiss()
+                    } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title3)
                             .symbolRenderingMode(.hierarchical)
@@ -47,8 +61,39 @@ struct SubscriptionView: View {
                 Text(store.error ?? "")
             }
             .onChange(of: store.isPremium) { _, isPremium in
-                if isPremium { dismiss() }
+                if isPremium {
+                    AnalyticsService.shared.track(AnalyticsEvent.paywallPurchased)
+                    dismiss()
+                }
             }
+            .onAppear {
+                if let current = store.offerings?.current {
+                    preselectAnnual(from: current.availablePackages)
+                }
+            }
+            .onChange(of: store.offerings?.current?.identifier) { _, _ in
+                if let current = store.offerings?.current {
+                    preselectAnnual(from: current.availablePackages)
+                }
+            }
+        }
+    }
+
+    private var paywallScroll: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                headerSection
+                featuresSection
+                packagesSection
+                footerSection
+            }
+        }
+    }
+
+    private func preselectAnnual(from packages: [Package]) {
+        if selectedPackage == nil {
+            let sorted = sortedPackages(packages)
+            selectedPackage = sorted.first(where: { $0.identifier == "$annual" }) ?? sorted.first
         }
     }
 
@@ -301,11 +346,117 @@ struct PackageCard: View {
         case "$monthly":
             return "Billed monthly"
         case "$annual":
+            if let perWeek = package.storeProduct.localizedPricePerWeek {
+                return "Save ~58% · \(perWeek)/week"
+            }
             return "Save ~58% vs monthly"
         case "$lifetime":
             return "One-time purchase"
         default:
             return ""
+        }
+    }
+}
+
+private struct TransformationIntroView: View {
+    let onContinue: () -> Void
+    @State private var appeared: Bool = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private let lines: [(before: String, after: String)] = [
+        ("Forgetting wins", "Noticing them daily"),
+        ("Guilty rest days", "Proud rest days"),
+        ("No rhythm", "A streak you care about")
+    ]
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 28) {
+                VStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    colors: [EarnedColors.accent.opacity(0.35), .clear],
+                                    center: .center,
+                                    startRadius: 10,
+                                    endRadius: 70
+                                )
+                            )
+                            .frame(width: 130, height: 130)
+
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 44, weight: .bold))
+                            .foregroundStyle(EarnedColors.primaryGradient)
+                    }
+
+                    Text("What changes after 7 days")
+                        .font(.title.bold())
+                        .multilineTextAlignment(.center)
+
+                    Text("Small, honest shifts people tell us they feel.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top, 32)
+
+                VStack(spacing: 14) {
+                    ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
+                        HStack(spacing: 14) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(line.before)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(.secondary)
+                                    .strikethrough(true, color: .secondary.opacity(0.6))
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                            Image(systemName: "arrow.right")
+                                .font(.caption.bold())
+                                .foregroundStyle(EarnedColors.accent)
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(line.after)
+                                    .font(.subheadline.weight(.bold))
+                                    .foregroundStyle(.primary)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 14)
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .clipShape(.rect(cornerRadius: 14))
+                        .opacity(appeared ? 1 : 0)
+                        .offset(y: reduceMotion ? 0 : (appeared ? 0 : 12))
+                        .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(Double(index) * 0.08), value: appeared)
+                    }
+                }
+                .padding(.horizontal, 16)
+
+                Text("No guarantees — just a better chance of remembering you showed up today.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+
+                Button(action: onContinue) {
+                    Text("See Earned Pro")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(EarnedColors.accent)
+                        .foregroundStyle(.white)
+                        .clipShape(.rect(cornerRadius: 14))
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 4)
+                .padding(.bottom, 40)
+            }
+        }
+        .onAppear {
+            if reduceMotion { appeared = true }
+            else { withAnimation(.easeOut(duration: 0.5)) { appeared = true } }
         }
     }
 }

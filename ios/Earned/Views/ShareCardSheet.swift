@@ -572,7 +572,8 @@ struct ShareCardSheet: View {
             if let card = vm.renderedCard {
                 ShareLink(
                     item: Image(uiImage: card),
-                    preview: SharePreview("MVM Earned", image: Image(uiImage: card))
+                    message: Text("Day \(streak) earned. ✨ — Earned app"),
+                    preview: SharePreview("Day \(streak) earned — Earned", image: Image(uiImage: card))
                 ) {
                     HStack(spacing: 5) {
                         Image(systemName: "square.and.arrow.up")
