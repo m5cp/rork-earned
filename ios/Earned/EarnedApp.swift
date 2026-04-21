@@ -1,7 +1,6 @@
 import SwiftUI
 import AppIntents
 import RevenueCat
-import GameKit
 
 nonisolated extension Notification.Name {
     static let earnedDeepLink = Notification.Name("earnedDeepLink")
@@ -28,7 +27,6 @@ struct EarnedApp: App {
             ContentView()
                 .onAppear {
                     refreshScheduledNotifications()
-                    GameCenterService.shared.authenticate()
                 }
                 .onOpenURL { url in
                     NotificationCenter.default.post(name: .earnedDeepLink, object: url)

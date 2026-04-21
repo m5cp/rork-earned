@@ -1,20 +1,30 @@
-# Phase plan — Medium & Compliance Improvements
+# Merge onboarding into one, clean up Settings, remove Game Center & Leaderboard
 
-## Phase 1 — Retention & Conversion
-- [x] Widget deep-link: tap widget opens directly into Today's check-in
-- [x] Shareable milestone moment (ShareLink on MilestoneCelebrationView)
-- [x] Second-chance paywall: if user dismisses paywall, offer a reduced follow-up moment
+## What I'll change
 
-## Phase 2 — Analytics Coverage
-- [x] Add tab_viewed events (today/journal/progress/settings)
-- [x] Add feature_used events for key features (share card opened, coach opened, journal exported)
-- [x] Add onboarding_completed coverage; restore already tracked in settings
+**One onboarding, shown once**
+- Remove the separate Welcome intro screen so there's only a single onboarding flow the first time someone opens the app.
+- Keep the existing 5-page onboarding (Own your wins → Build momentum → AI journal → Track mood → Say it out loud) as the sole first-run experience.
+- After it's completed once, it will never show again (this is already stored on the device — I'll make sure the old welcome flag doesn't re-trigger it).
 
-## Phase 3 — Compliance Polish
-- [x] Restore purchases accessible on paywall + settings
-- [x] Delete-data clarity (renamed to "Delete All Data" + subtitle + a11y hint)
-- [x] Close button accessibility label on paywall
-- [x] No dead buttons found during audit
+**Remove Game Center entirely**
+- Delete the Game Center sign-in, authentication, and score submission throughout the app.
+- Remove the Game Center section from Settings.
+- Remove the Game Center auto-authenticate on app launch.
 
-## Phase 4 — Build verification
-- [x] swiftBuild passes
+**Remove the Leaderboard**
+- Delete the Leaderboard preview card from the Progress tab.
+- Remove all leaderboard code and references.
+
+**Fix the Settings page layout**
+- Align every section header and row consistently to the left edge of the cards.
+- Fix the indented/misaligned rows under Daily Nudge (time picker and frequency picker were pushed too far right).
+- Consolidate the duplicated "Privacy" and "Privacy & Insights" sections into a single clean Privacy section.
+- Make sure icon sizes, row padding, and spacing match across every group so the whole screen reads as one tidy list like native iOS Settings.
+- Keep all existing functionality: reminders, calendar sync, appearance, privacy insights toggle, support, legal, data reset, export, about.
+
+## Result
+- First launch: one clean onboarding, then straight into the app.
+- Returning users: never see onboarding again.
+- No Game Center, no leaderboard anywhere in the app.
+- Settings page looks polished, consistent, and properly left-aligned.

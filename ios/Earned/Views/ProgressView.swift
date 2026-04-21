@@ -2,7 +2,6 @@ import SwiftUI
 
 struct EarnedProgressView: View {
     let viewModel: EarnedViewModel
-    var gameCenter: GameCenterService = GameCenterService.shared
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared: Bool = false

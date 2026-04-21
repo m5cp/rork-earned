@@ -1,10 +1,8 @@
 import SwiftUI
-import GameKit
 
 struct ContentView: View {
     @State private var viewModel = EarnedViewModel()
     @State private var storeViewModel = StoreViewModel()
-    @State private var gameCenter = GameCenterService.shared
     @State private var selectedTab: Int = 0
     @State private var showSplash: Bool = true
     @State private var showMilestoneCelebration: Bool = false
@@ -17,17 +15,11 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            if !hasSeenWelcome && !hasCompletedOnboarding && showSplash == false {
-                WelcomeView {
-                    withAnimation(.smooth(duration: 0.5)) {
-                        hasSeenWelcome = true
-                    }
-                }
-                .transition(.opacity)
-            } else if !hasCompletedOnboarding && showSplash == false {
+            if !hasCompletedOnboarding && showSplash == false {
                 OnboardingView {
                     withAnimation(.smooth(duration: 0.5)) {
                         hasCompletedOnboarding = true
+                        hasSeenWelcome = true
                     }
                 }
                 .transition(.opacity)
@@ -105,13 +97,6 @@ struct ContentView: View {
                     }
                 }
 
-                gameCenter.submitScores(
-                    totalWins: viewModel.totalWinsEarned,
-                    longestStreak: viewModel.longestStreak,
-                    weeklyWins: viewModel.weeklyEarnedCount,
-                    level: viewModel.currentLevel
-                )
-
                 triggerReviewPromptIfNeeded()
             }
         }
@@ -140,11 +125,11 @@ struct ContentView: View {
             }
 
             Tab("Progress", systemImage: "chart.bar.fill", value: 2) {
-                EarnedProgressView(viewModel: viewModel, gameCenter: gameCenter)
+                EarnedProgressView(viewModel: viewModel)
             }
 
             Tab("Settings", systemImage: "gearshape.fill", value: 3) {
-                SettingsView(viewModel: viewModel, store: storeViewModel, gameCenter: gameCenter)
+                SettingsView(viewModel: viewModel, store: storeViewModel)
             }
         }
         .tint(EarnedColors.accent)

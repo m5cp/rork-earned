@@ -4,7 +4,6 @@ import UserNotifications
 struct SettingsView: View {
     let viewModel: EarnedViewModel
     var store: StoreViewModel
-    var gameCenter: GameCenterService
     @State private var showResetAlert: Bool = false
     @State private var showSubscription: Bool = false
     @State private var nudgeEnabled: Bool = false
@@ -26,6 +25,8 @@ struct SettingsView: View {
     @State private var analytics = AnalyticsService.shared
     @State private var isRestoring: Bool = false
     @State private var restoreMessage: String?
+    @State private var showExportShare: Bool = false
+    @State private var exportPDFData: Data?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var appVersion: String {
@@ -37,71 +38,53 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 0) {
+                VStack(alignment: .leading, spacing: 20) {
                     profileCard
-                        .padding(.horizontal)
-                        .padding(.bottom, 16)
-                        .padding(.top, 4)
-
                     milestonesPreview
-                        .padding(.horizontal)
-                        .padding(.bottom, 16)
-
                     subscriptionCard
-                        .padding(.horizontal)
-                        .padding(.bottom, 16)
 
-                    VStack(spacing: 14) {
-                        settingsGroup(title: "Reminders", icon: "bell.fill", iconColor: EarnedColors.accent) {
-                            dailyNudgeContent
-                            Divider().padding(.leading, 16)
-                            weeklyMomentumContent
-                        }
-
-                        settingsGroup(title: "Game Center", icon: "gamecontroller.fill", iconColor: EarnedColors.momentum) {
-                            gameCenterContent
-                        }
-
-                        settingsGroup(title: "Integrations", icon: "link", iconColor: EarnedColors.momentum) {
-                            calendarSyncContent
-                        }
-
-                        settingsGroup(title: "Appearance", icon: "paintbrush.fill", iconColor: EarnedColors.streak) {
-                            appearanceContent
-                        }
-
-                        settingsGroup(title: "Privacy", icon: "lock.shield.fill", iconColor: EarnedColors.earned) {
-                            privacyContent
-                        }
-
-                        settingsGroup(title: "Privacy & Insights", icon: "chart.bar.doc.horizontal", iconColor: EarnedColors.momentum) {
-                            insightsContent
-                        }
-
-                        settingsGroup(title: "Support", icon: "lifepreserver.fill", iconColor: EarnedColors.accent) {
-                            supportContent
-                        }
-
-                        settingsGroup(title: "Legal", icon: "doc.text.fill", iconColor: .secondary) {
-                            legalContent
-                        }
-
-                        settingsGroup(title: "Data", icon: "cylinder.split.1x2.fill", iconColor: EarnedColors.strength) {
-                            dataContent
-                        }
-
-                        settingsGroup(title: "Export", icon: "square.and.arrow.up.fill", iconColor: EarnedColors.accent) {
-                            exportContent
-                        }
-
-                        aboutCard
+                    settingsGroup(title: "Reminders", icon: "bell.fill", iconColor: EarnedColors.accent) {
+                        dailyNudgeContent
+                        Divider().padding(.leading, 62)
+                        weeklyMomentumContent
                     }
-                    .padding(.horizontal)
+
+                    settingsGroup(title: "Integrations", icon: "link", iconColor: EarnedColors.momentum) {
+                        calendarSyncContent
+                    }
+
+                    settingsGroup(title: "Appearance", icon: "paintbrush.fill", iconColor: EarnedColors.streak) {
+                        appearanceContent
+                    }
+
+                    settingsGroup(title: "Privacy", icon: "lock.shield.fill", iconColor: EarnedColors.earned) {
+                        privacyContent
+                    }
+
+                    settingsGroup(title: "Support", icon: "lifepreserver.fill", iconColor: EarnedColors.accent) {
+                        supportContent
+                    }
+
+                    settingsGroup(title: "Legal", icon: "doc.text.fill", iconColor: .secondary) {
+                        legalContent
+                    }
+
+                    settingsGroup(title: "Export", icon: "square.and.arrow.up.fill", iconColor: EarnedColors.accent) {
+                        exportContent
+                    }
+
+                    settingsGroup(title: "Data", icon: "cylinder.split.1x2.fill", iconColor: EarnedColors.strength) {
+                        dataContent
+                    }
+
+                    aboutCard
 
                     footerText
-                        .padding(.top, 24)
+                        .padding(.top, 8)
                         .padding(.bottom, 40)
+                        .frame(maxWidth: .infinity)
                 }
+                .padding(.horizontal)
                 .padding(.top, 8)
             }
             .scrollIndicators(.hidden)
@@ -167,6 +150,11 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showEULA) {
                 EULAView()
+            }
+            .sheet(isPresented: $showExportShare) {
+                if let data = exportPDFData {
+                    ShareSheet(items: [data])
+                }
             }
         }
     }
@@ -257,6 +245,7 @@ struct SettingsView: View {
             .offset(y: reduceMotion ? 0 : (appeared ? 0 : 10))
             .animation(reduceMotion ? nil : .easeOut(duration: 0.4).delay(0.15), value: appeared)
         }
+        .frame(maxWidth: .infinity)
         .padding(20)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(.rect(cornerRadius: 20))
@@ -293,7 +282,7 @@ struct SettingsView: View {
         NavigationLink {
             MilestonesView(viewModel: viewModel)
         } label: {
-            VStack(spacing: 14) {
+            VStack(alignment: .leading, spacing: 14) {
                 HStack {
                     HStack(spacing: 8) {
                         Image(systemName: "trophy.fill")
@@ -384,6 +373,7 @@ struct SettingsView: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
             .background(Color(.secondarySystemGroupedBackground))
             .clipShape(.rect(cornerRadius: 18))
@@ -483,7 +473,7 @@ struct SettingsView: View {
     // MARK: - Settings Group
 
     private func settingsGroup<Content: View>(title: String, icon: String, iconColor: Color, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 Image(systemName: icon)
                     .font(.system(size: 12, weight: .bold))
@@ -494,15 +484,15 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
             .padding(.leading, 4)
-            .padding(.bottom, 10)
 
             VStack(spacing: 0) {
                 content()
             }
-            .padding(.vertical, 4)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(.secondarySystemGroupedBackground))
             .clipShape(.rect(cornerRadius: 16))
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: - Daily Nudge
@@ -520,24 +510,37 @@ struct SettingsView: View {
             }
 
             if nudgeEnabled {
-                Divider().padding(.leading, 56)
+                Divider().padding(.leading, 62)
 
-                DatePicker("Time", selection: $nudgeTime, displayedComponents: .hourAndMinute)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .padding(.leading, 40)
-                    .onChange(of: nudgeTime) { _, _ in rescheduleNudge() }
-
-                Divider().padding(.leading, 56)
-
-                Picker("Frequency", selection: $nudgeFrequency) {
-                    ForEach(DailyNudgeService.NudgeFrequency.allCases) { freq in
-                        Text(freq.displayName).tag(freq)
-                    }
+                HStack {
+                    Text("Time")
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    DatePicker("", selection: $nudgeTime, displayedComponents: .hourAndMinute)
+                        .labelsHidden()
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-                .padding(.leading, 40)
+                .onChange(of: nudgeTime) { _, _ in rescheduleNudge() }
+
+                Divider().padding(.leading, 62)
+
+                HStack {
+                    Text("Frequency")
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    Picker("", selection: $nudgeFrequency) {
+                        ForEach(DailyNudgeService.NudgeFrequency.allCases) { freq in
+                            Text(freq.displayName).tag(freq)
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 4)
                 .onChange(of: nudgeFrequency) { _, _ in rescheduleNudge() }
             }
         }
@@ -586,18 +589,25 @@ struct SettingsView: View {
                     .foregroundStyle(EarnedColors.streak)
             }
 
-            Picker("Theme", selection: $appTheme) {
+            Text("Theme")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.primary)
+
+            Spacer()
+
+            Picker("", selection: $appTheme) {
                 ForEach(AppTheme.allCases) { theme in
                     Text(theme.displayName).tag(theme)
                 }
             }
+            .labelsHidden()
             .pickerStyle(.menu)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
     }
 
-    // MARK: - Privacy
+    // MARK: - Privacy (consolidated)
 
     private var privacyContent: some View {
         VStack(spacing: 0) {
@@ -619,40 +629,14 @@ struct SettingsView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+
+                Spacer()
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
 
             Divider().padding(.leading, 62)
 
-            HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(EarnedColors.accent.opacity(0.15))
-                        .frame(width: 32, height: 32)
-
-                    Image(systemName: "eye.slash.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(EarnedColors.accent)
-                }
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Anonymous Insights Off by Default")
-                        .font(.subheadline.weight(.medium))
-                    Text("Opt in below — no names, no content, no ads")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-        }
-    }
-
-    // MARK: - Insights Opt-In
-
-    private var insightsContent: some View {
-        VStack(spacing: 0) {
             Toggle(isOn: Binding(
                 get: { analytics.isOptedIn },
                 set: { analytics.isOptedIn = $0 }
@@ -661,29 +645,8 @@ struct SettingsView: View {
                     icon: "chart.line.uptrend.xyaxis",
                     iconColor: EarnedColors.momentum,
                     title: "Share Anonymous Usage",
-                    subtitle: "Help improve Earned — no names or content"
+                    subtitle: "Off by default. No names or content."
                 )
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-
-            Divider().padding(.leading, 62)
-
-            HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(EarnedColors.accent.opacity(0.15))
-                        .frame(width: 32, height: 32)
-
-                    Image(systemName: "info.circle.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(EarnedColors.accent)
-                }
-
-                Text("Off by default. Only anonymous counters like screens opened and paywall outcomes. Turn off anytime.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
@@ -846,184 +809,7 @@ struct SettingsView: View {
         .padding(.vertical, 12)
     }
 
-    // MARK: - About
-
-    private var aboutCard: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 8) {
-                Image(systemName: "info.circle.fill")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(.secondary)
-                Text("ABOUT")
-                    .font(.caption.weight(.heavy))
-                    .tracking(0.8)
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.leading, 4)
-            .padding(.bottom, 10)
-
-            VStack(spacing: 0) {
-                aboutRow(label: "Version", value: appVersion)
-                Divider().padding(.leading, 16)
-                aboutRow(label: "Level", value: "\(viewModel.currentLevel) — \(viewModel.levelTitle)")
-                Divider().padding(.leading, 16)
-                aboutRow(label: "Days Checked In", value: "\(viewModel.totalDaysCheckedIn)")
-                Divider().padding(.leading, 16)
-                aboutRow(label: "Total Wins", value: "\(viewModel.totalWinsEarned)")
-                Divider().padding(.leading, 16)
-                aboutRow(label: "Longest Streak", value: "\(viewModel.longestStreak)")
-                Divider().padding(.leading, 16)
-                aboutRow(label: "Milestones", value: "\(viewModel.unlockedMilestones.count) unlocked")
-            }
-            .padding(.vertical, 4)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(.rect(cornerRadius: 16))
-        }
-    }
-
-    private func aboutRow(label: String, value: String) -> some View {
-        HStack {
-            Text(label)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            Spacer()
-            Text(value)
-                .font(.subheadline.weight(.medium))
-                .monospacedDigit()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-    }
-
-    // MARK: - Game Center
-
-    private var gameCenterContent: some View {
-        VStack(spacing: 0) {
-            if gameCenter.isAuthenticated {
-                HStack(spacing: 14) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(EarnedColors.earned.opacity(0.15))
-                            .frame(width: 32, height: 32)
-
-                        Image(systemName: "person.crop.circle.badge.checkmark")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(EarnedColors.earned)
-                    }
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(gameCenter.playerDisplayName)
-                            .font(.subheadline.weight(.medium))
-                        Text("Connected to Game Center")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(EarnedColors.earned)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-
-            } else {
-                Button {
-                    gameCenter.authenticate()
-                } label: {
-                    HStack(spacing: 14) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(EarnedColors.momentum.opacity(0.15))
-                                .frame(width: 32, height: 32)
-
-                            Image(systemName: "gamecontroller.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(EarnedColors.momentum)
-                        }
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Sign In to Game Center")
-                                .font(.subheadline.weight(.medium))
-                                .foregroundStyle(.primary)
-                            Text("Track achievements and compete")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Spacer()
-
-                        if gameCenter.isAuthenticating {
-                            ProgressView()
-                                .controlSize(.small)
-                        } else {
-                            Image(systemName: "chevron.right")
-                                .font(.caption2.weight(.bold))
-                                .foregroundStyle(.tertiary)
-                        }
-                    }
-                }
-                .disabled(gameCenter.isAuthenticating)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-
-                if let error = gameCenter.authError {
-                    Divider().padding(.leading, 62)
-
-                    HStack(spacing: 14) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.red.opacity(0.1))
-                                .frame(width: 32, height: 32)
-
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(.red)
-                        }
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Sign-In Issue")
-                                .font(.subheadline.weight(.medium))
-                            Text(error)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                } else {
-                    Divider().padding(.leading, 62)
-
-                    HStack(spacing: 14) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(EarnedColors.earned.opacity(0.15))
-                                .frame(width: 32, height: 32)
-
-                            Image(systemName: "eye.slash.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(EarnedColors.earned)
-                        }
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Privacy-First")
-                                .font(.subheadline.weight(.medium))
-                            Text("Apple handles identity. You stay anonymous.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                }
-            }
-        }
-    }
-
     // MARK: - Export
-
-    @State private var showExportShare: Bool = false
-    @State private var exportPDFData: Data?
 
     private var exportContent: some View {
         Button {
@@ -1033,11 +819,6 @@ struct SettingsView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .sheet(isPresented: $showExportShare) {
-            if let data = exportPDFData {
-                ShareSheet(items: [data])
-            }
-        }
     }
 
     private func exportJournalPDF() {
@@ -1055,6 +836,55 @@ struct SettingsView: View {
         )
         exportPDFData = data
         showExportShare = true
+    }
+
+    // MARK: - About
+
+    private var aboutCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: "info.circle.fill")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.secondary)
+                Text("ABOUT")
+                    .font(.caption.weight(.heavy))
+                    .tracking(0.8)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.leading, 4)
+
+            VStack(spacing: 0) {
+                aboutRow(label: "Version", value: appVersion)
+                Divider().padding(.leading, 16)
+                aboutRow(label: "Level", value: "\(viewModel.currentLevel) — \(viewModel.levelTitle)")
+                Divider().padding(.leading, 16)
+                aboutRow(label: "Days Checked In", value: "\(viewModel.totalDaysCheckedIn)")
+                Divider().padding(.leading, 16)
+                aboutRow(label: "Total Wins", value: "\(viewModel.totalWinsEarned)")
+                Divider().padding(.leading, 16)
+                aboutRow(label: "Longest Streak", value: "\(viewModel.longestStreak)")
+                Divider().padding(.leading, 16)
+                aboutRow(label: "Milestones", value: "\(viewModel.unlockedMilestones.count) unlocked")
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(.rect(cornerRadius: 16))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func aboutRow(label: String, value: String) -> some View {
+        HStack {
+            Text(label)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(value)
+                .font(.subheadline.weight(.medium))
+                .monospacedDigit()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
     }
 
     // MARK: - Footer
@@ -1084,10 +914,13 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.primary)
                 Text(subtitle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+
+            Spacer(minLength: 0)
         }
     }
 
