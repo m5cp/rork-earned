@@ -3,6 +3,8 @@ import SwiftUI
 struct OnboardingView: View {
     let onComplete: () -> Void
     @State private var currentPage: Int = 0
+    @State private var showPaywall: Bool = false
+    @State private var paywallStore = StoreViewModel()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared: Bool = false
 
@@ -40,7 +42,7 @@ struct OnboardingView: View {
     ]
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .topTrailing) {
             backgroundLayer.ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -67,6 +69,13 @@ struct OnboardingView: View {
                 skipButton
                     .padding(.bottom, 36)
             }
+
+            proButton
+                .padding(.top, 8)
+                .padding(.trailing, 20)
+        }
+        .sheet(isPresented: $showPaywall) {
+            SubscriptionView(store: paywallStore)
         }
         .onAppear {
             if reduceMotion { appeared = true }
@@ -160,9 +169,41 @@ struct OnboardingView: View {
             onComplete()
         } label: {
             Text("Skip")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.5))
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(.white.opacity(0.95))
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(.white.opacity(0.12), in: Capsule())
+                .overlay(Capsule().strokeBorder(.white.opacity(0.25), lineWidth: 1))
         }
+    }
+
+    private var proButton: some View {
+        Button {
+            AnalyticsService.shared.track("onboarding_pro_tapped")
+            showPaywall = true
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: "crown.fill")
+                    .font(.system(size: 11, weight: .heavy))
+                Text("Pro")
+                    .font(.footnote.weight(.heavy))
+                    .tracking(0.5)
+            }
+            .foregroundStyle(Color(red: 0.04, green: 0.05, blue: 0.14))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(
+                LinearGradient(
+                    colors: [Color(red: 1.0, green: 0.85, blue: 0.35), Color(red: 1.0, green: 0.65, blue: 0.20)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ),
+                in: Capsule()
+            )
+            .shadow(color: Color(red: 1.0, green: 0.7, blue: 0.2).opacity(0.4), radius: 8, y: 3)
+        }
+        .accessibilityLabel("Upgrade to Pro")
     }
 
     private var backgroundLayer: some View {
