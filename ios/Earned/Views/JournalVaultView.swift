@@ -6,7 +6,15 @@ struct JournalVaultView: View {
     @State private var selectedFilter: VaultFilter = .all
     @State private var selectedDate: IdentifiableDate?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var appeared: Bool = false
+
+    private var isWide: Bool { horizontalSizeClass == .regular }
+    private var gridColumns: [GridItem] {
+        isWide
+            ? [GridItem(.adaptive(minimum: 320), spacing: 16)]
+            : [GridItem(.flexible())]
+    }
 
     private var filteredEntries: [(key: String, entry: DailyEntry)] {
         var result = viewModel.allEntriesSorted
@@ -37,9 +45,10 @@ struct JournalVaultView: View {
             if filteredEntries.isEmpty {
                 emptyState
             } else {
-                LazyVStack(spacing: 16) {
+                LazyVGrid(columns: gridColumns, spacing: 16) {
                     if viewModel.averageMood != nil {
                         moodSummaryCard
+                            .gridCellColumns(isWide ? 2 : 1)
                     }
 
                     ForEach(Array(filteredEntries.enumerated()), id: \.element.key) { index, pair in

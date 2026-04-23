@@ -132,6 +132,7 @@ struct ContentView: View {
                 SettingsView(viewModel: viewModel, store: storeViewModel)
             }
         }
+        .tabViewStyle(.sidebarAdaptable)
         .tint(EarnedColors.accent)
         .onChange(of: selectedTab) { _, newValue in
             let name: String = switch newValue {

@@ -88,6 +88,8 @@ struct SubscriptionView: View {
                 packagesSection
                 footerSection
             }
+            .frame(maxWidth: 560)
+            .frame(maxWidth: .infinity)
         }
     }
 
