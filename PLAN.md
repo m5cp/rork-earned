@@ -1,36 +1,31 @@
-# Add daily reflection caps (1 free / 2 premium), remove lifetime plan, update pricing copy
+# RevenueCat audit + bump to 1.0.1 (build 10) for resubmission
 
-## Daily reflection limits
+## Audit findings
 
-- **Free users:** 1 AI reflection per day. When they tap "Write my journal entry" or "Regenerate" a second time, show a friendly "Daily limit reached" screen with an **Upgrade to Premium** button.
-- **Premium users:** 2 AI reflections per day. When they try a third, show a friendly "You've used today's reflections" message with a gentle "Come back tomorrow" note and the exact reset time (local midnight).
-- Both caps count any successful AI generation (including regenerations).
-- Editing and saving your already-generated entry does **not** count — users can always revise and re-save.
-- The reflection ring still closes for the day whether they used 0, 1, or 2 reflections — just logging and swiping the cards counts.
+**The actual rejection cause is in App Store Connect, not your code.** Both subscription products show "Developer Action Needed" in your screenshots. While that status is active, every purchase attempt fails with an error — exactly what the reviewer saw. No code change can fix that; you must complete the missing info on each product page in App Store Connect (usually localized display name, description, or review screenshot), and confirm the Paid Apps Agreement is active.
 
-## Remove Lifetime plan
+**Code-side audit — everything is wired correctly:**
+- RevenueCat SDK is installed via Swift Package Manager ✅
+- Configured at app launch with the test key in Debug builds and the production key in Release/TestFlight builds ✅
+- Entitlement identifier `premium` is used consistently across the paywall, settings, journal, onboarding, and streak shield logic ✅
+- Purchase, restore, and live customer-info listening are all implemented correctly ✅
+- The paywall correctly handles cancellation, pending payment, and dismisses on successful purchase ✅
 
-- Remove the Lifetime option from the paywall entirely (Monthly and Yearly only).
-- Remove Lifetime from the second-chance overlay and sort order.
-- No App Store Connect action needed — the plan simply won't appear in the app even if the product still exists in RevenueCat.
+**Two small improvements worth making:**
+1. Build number is still 1 — needs to be 10 (Apple already used 9).
+2. The paywall shows raw RevenueCat error text in the alert. We'll translate a few common error codes (configuration/products not available, network, store problems) into friendly, plain-English messages so future issues feel less broken to users.
 
-## Paywall pricing copy
+## What I'll change
 
-- Remove the "Save ~58%" savings percentage from the Yearly option (percentages vary by country).
-- Replace with neutral, country-safe copy:
-  - **Monthly:** "Billed monthly"
-  - **Yearly:** "Best value · {price}/week" (RevenueCat auto-localizes the per-week price)
-- Keep the "BEST VALUE" badge on Yearly.
-- Actual prices ($11.99/month, $59.99/year) are updated by you in App Store Connect — the app reads them live from RevenueCat, so the new prices will appear automatically once approved.
+- **Bump version to 1.0.1 and build number to 10** across all targets so a fresh build can be uploaded to TestFlight.
+- **Friendlier purchase error messages** on the paywall — if products fail to load or a purchase errors due to store configuration, show a clear "Subscriptions are temporarily unavailable, please try again shortly" instead of a raw technical message. Cancellations stay silent (already correct).
+- **Re-fetch offerings when the paywall opens** if they failed initially, so a transient load failure doesn't leave the paywall blank.
 
-## How this compares to similar apps (2026)
+## What you need to do (outside the app)
 
-**Verdict:** $59.99/year is right in the pocket for AI-journaling apps — matches Reflectly and Stoic Premium exactly. $11.99/month is slightly above the $9.99 norm but justified by AI generation; it also widens the monthly→yearly gap, which pushes more users into the (higher-LTV) annual plan. Removing Lifetime is the right call for a subscription-first business and is consistent with Reflectly, Finch, and Day One.
+1. Open each subscription in App Store Connect and clear the "Developer Action Needed" banner — fill in the missing localization, description, or review screenshot it asks for.
+2. Confirm the Paid Apps Agreement is active under Business → Agreements.
+3. Make sure both products are attached to the next review submission.
+4. After I push build 10, upload it to TestFlight and submit for review.
 
-## Pages / Screens affected
-
-- **Today → Journal card:** New "Daily limit reached" state with upgrade CTA (free) or "come back tomorrow" copy (premium).
-- **Paywall:** Lifetime row removed; savings-percentage text replaced with neutral per-week pricing.
-- **Second-chance paywall:** Lifetime removed from sort.
-- No other screens change.
-
+Once you approve, I'll make the changes and rebuild.

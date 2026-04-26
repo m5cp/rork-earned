@@ -68,6 +68,9 @@ struct SubscriptionView: View {
                 }
             }
             .onAppear {
+                if store.offerings?.current == nil && !store.isLoading {
+                    Task { await store.fetchOfferings() }
+                }
                 if let current = store.offerings?.current {
                     preselectAnnual(from: current.availablePackages)
                 }
@@ -222,8 +225,21 @@ struct SubscriptionView: View {
                 .disabled(selectedPackage == nil || store.isPurchasing)
                 .padding(.top, 4)
             } else {
-                ContentUnavailableView("Unable to Load Plans", systemImage: "exclamationmark.triangle", description: Text("Check your connection and try again."))
-                    .padding(.vertical, 20)
+                VStack(spacing: 12) {
+                    ContentUnavailableView("Unable to Load Plans", systemImage: "exclamationmark.triangle", description: Text("Check your connection and try again."))
+                    Button {
+                        Task { await store.fetchOfferings() }
+                    } label: {
+                        Text("Retry")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                            .background(EarnedColors.accent.opacity(0.12))
+                            .foregroundStyle(EarnedColors.accent)
+                            .clipShape(.rect(cornerRadius: 12))
+                    }
+                }
+                .padding(.vertical, 20)
             }
         }
         .padding(.horizontal, 16)
