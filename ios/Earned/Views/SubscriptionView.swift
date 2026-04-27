@@ -1,5 +1,6 @@
 import SwiftUI
 import RevenueCat
+import StoreKit
 
 struct SubscriptionView: View {
     var store: StoreViewModel
@@ -248,18 +249,31 @@ struct SubscriptionView: View {
 
     private var footerSection: some View {
         VStack(spacing: 12) {
-            Button {
-                isRestoring = true
-                Task {
-                    await store.restore()
-                    isRestoring = false
+            HStack(spacing: 20) {
+                Button {
+                    isRestoring = true
+                    Task {
+                        await store.restore()
+                        isRestoring = false
+                    }
+                } label: {
+                    if isRestoring {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Text("Restore Purchases")
+                            .font(.footnote.weight(.medium))
+                    }
                 }
-            } label: {
-                if isRestoring {
-                    ProgressView()
-                        .controlSize(.small)
-                } else {
-                    Text("Restore Purchases")
+
+                Text("·")
+                    .font(.footnote)
+                    .foregroundStyle(.tertiary)
+
+                Button {
+                    presentOfferCodeSheet()
+                } label: {
+                    Text("Redeem Offer Code")
                         .font(.footnote.weight(.medium))
                 }
             }
@@ -286,6 +300,16 @@ struct SubscriptionView: View {
         .padding(.horizontal, 24)
         .padding(.top, 20)
         .padding(.bottom, 40)
+    }
+
+    private func presentOfferCodeSheet() {
+        guard let scene = UIApplication.shared.connectedScenes
+            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene
+            ?? UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
+        Task {
+            try? await AppStore.presentOfferCodeRedeemSheet(in: scene)
+            await store.restore()
+        }
     }
 
     private func sortedPackages(_ packages: [Package]) -> [Package] {
@@ -334,6 +358,17 @@ struct PackageCard: View {
                     Text(priceDescription)
                         .font(.caption)
                         .foregroundStyle(.secondary)
+
+                    if hasIntroOffer {
+                        HStack(spacing: 4) {
+                            Image(systemName: "gift.fill")
+                                .font(.system(size: 9, weight: .bold))
+                            Text("Free trial available")
+                                .font(.caption2.weight(.semibold))
+                        }
+                        .foregroundStyle(EarnedColors.earned)
+                        .padding(.top, 2)
+                    }
                 }
 
                 Spacer()
@@ -356,7 +391,7 @@ struct PackageCard: View {
     private var displayName: String {
         switch package.identifier {
         case "$monthly": return "Monthly"
-        case "$annual": return "Yearly"
+        case "$annual": return "Annual"
         case "$lifetime": return "Lifetime"
         default: return package.storeProduct.localizedTitle
         }
@@ -374,6 +409,10 @@ struct PackageCard: View {
         default:
             return ""
         }
+    }
+
+    private var hasIntroOffer: Bool {
+        package.storeProduct.introductoryDiscount != nil
     }
 }
 
